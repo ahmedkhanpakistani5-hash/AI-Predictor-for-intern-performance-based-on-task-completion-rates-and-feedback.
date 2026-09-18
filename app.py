@@ -1,10 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 from groq import Groq
@@ -23,358 +22,569 @@ st.set_page_config(
 
 
 # =========================================================
-# GLOBAL CSS
+# COMPLETE CSS THEME
 # =========================================================
 
 st.html("""
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-* {
-    font-family: 'Inter', sans-serif;
-}
+/* =====================================================
+   MAIN APP BACKGROUND
+   ===================================================== */
 
 .stApp {
     background:
         radial-gradient(
-            circle at 5% 15%,
-            rgba(22, 111, 106, 0.45),
+            circle at 5% 10%,
+            rgba(0, 210, 255, 0.15),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 95% 5%,
+            rgba(150, 45, 255, 0.20),
             transparent 28%
         ),
         radial-gradient(
-            circle at 95% 20%,
-            rgba(30, 66, 135, 0.48),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 75% 90%,
-            rgba(91, 49, 34, 0.42),
+            circle at 50% 100%,
+            rgba(70, 40, 180, 0.12),
             transparent 30%
         ),
         linear-gradient(
             135deg,
-            #071016 0%,
-            #0b1825 45%,
-            #111a2d 72%,
-            #1d110d 100%
+            #031329 0%,
+            #061d3c 38%,
+            #09184a 68%,
+            #1b0b3d 100%
         );
+
+    background-attachment: fixed;
 }
 
 
-/* ================= SIDEBAR ================= */
+/* =====================================================
+   STREAMLIT TOP HEADER
+   ===================================================== */
+
+header[data-testid="stHeader"] {
+    background:
+        linear-gradient(
+            90deg,
+            #04152e 0%,
+            #082b4d 35%,
+            #101d55 65%,
+            #35105b 100%
+        ) !important;
+
+    border-bottom:
+        1px solid rgba(80, 220, 255, 0.35) !important;
+
+    box-shadow:
+        0 0 18px rgba(0, 200, 255, 0.25),
+        0 0 35px rgba(110, 50, 255, 0.25) !important;
+}
+
+
+/* =====================================================
+   NEON LINE UNDER TOP HEADER
+   ===================================================== */
+
+header[data-testid="stHeader"]::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: -2px;
+
+    height: 3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #00eaff 0%,
+            #008cff 30%,
+            #634cff 55%,
+            #a83cff 75%,
+            #ef3cff 100%
+        );
+
+    box-shadow:
+        0 0 8px #00eaff,
+        0 0 18px #684cff,
+        0 0 30px #c43cff;
+}
+
+
+/* =====================================================
+   HEADER BUTTONS / ICONS
+   ===================================================== */
+
+header[data-testid="stHeader"] button {
+    color: #dffaff !important;
+}
+
+
+/* =====================================================
+   SIDEBAR
+   ===================================================== */
 
 section[data-testid="stSidebar"] {
     background:
         linear-gradient(
             180deg,
-            #11143b 0%,
-            #15163d 50%,
-            #0d1730 100%
-        );
+            #041329 0%,
+            #061a37 45%,
+            #120b35 100%
+        ) !important;
 
-    border-right: 1px solid rgba(255,255,255,0.08);
+    border-right:
+        1px solid rgba(0, 210, 255, 0.25);
+
+    box-shadow:
+        8px 0 35px rgba(0, 0, 0, 0.30);
 }
 
 
-/* ================= MAIN AREA ================= */
+section[data-testid="stSidebar"] * {
+    color: #d9efff;
+}
+
+
+/* =====================================================
+   MAIN CONTENT
+   ===================================================== */
 
 .block-container {
-    max-width: 1450px;
-    padding-top: 2rem;
-    padding-bottom: 4rem;
+    max-width: 1400px !important;
+
+    padding-top: 2.5rem !important;
+    padding-bottom: 3rem !important;
 }
 
 
-/* ================= HERO ================= */
+/* =====================================================
+   HERO
+   ===================================================== */
 
 .hero {
+    position: relative;
+
+    padding: 45px 42px;
+
+    margin-bottom: 30px;
+
+    border-radius: 26px;
+
+    overflow: hidden;
+
     background:
         linear-gradient(
             135deg,
-            rgba(7, 63, 76, 0.96),
-            rgba(18, 37, 78, 0.97),
-            rgba(55, 27, 67, 0.96)
+            rgba(4, 29, 57, 0.93),
+            rgba(8, 29, 70, 0.91),
+            rgba(39, 12, 70, 0.90)
         );
 
-    border: 1px solid rgba(72, 211, 210, 0.18);
-
-    border-radius: 22px;
-
-    padding: 27px 30px;
+    border:
+        1px solid rgba(0, 220, 255, 0.30);
 
     box-shadow:
-        0 18px 55px rgba(0,0,0,0.38),
-        0 0 35px rgba(26, 183, 188, 0.10);
-
-    margin-bottom: 28px;
+        0 0 30px rgba(0, 190, 255, 0.12),
+        0 0 55px rgba(130, 50, 255, 0.13);
 }
 
+
+.hero::before {
+    content: "";
+
+    position: absolute;
+
+    width: 350px;
+    height: 350px;
+
+    top: -180px;
+    left: -130px;
+
+    background: #00d9ff;
+
+    opacity: 0.10;
+
+    filter: blur(80px);
+
+    border-radius: 50%;
+}
+
+
+.hero::after {
+    content: "";
+
+    position: absolute;
+
+    width: 400px;
+    height: 400px;
+
+    right: -150px;
+    bottom: -200px;
+
+    background: #a52cff;
+
+    opacity: 0.12;
+
+    filter: blur(90px);
+
+    border-radius: 50%;
+}
+
+
 .hero-title {
-    font-size: 38px;
-    font-weight: 800;
+    position: relative;
+
+    z-index: 2;
+
+    font-size: 3rem;
+
+    font-weight: 850;
 
     background:
         linear-gradient(
             90deg,
-            #4ed9d2,
-            #67dca5,
-            #9b8cff
+            #ffffff,
+            #58eaff,
+            #8f8cff,
+            #ff6ee7
         );
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+
+    margin-bottom: 12px;
+}
+
+
+.hero-subtitle {
+    position: relative;
+
+    z-index: 2;
+
+    color: #b9d9f3;
+
+    font-size: 1.05rem;
+
+    line-height: 1.7;
+
+    max-width: 850px;
+}
+
+
+/* =====================================================
+   SECTION TITLES
+   ===================================================== */
+
+.section-title {
+    font-size: 1.45rem;
+
+    font-weight: 800;
+
+    color: #e0f7ff;
+
+    margin-top: 30px;
+
+    margin-bottom: 16px;
+
+    text-shadow:
+        0 0 15px rgba(0, 220, 255, 0.25);
+}
+
+
+/* =====================================================
+   GLASS CARDS
+   ===================================================== */
+
+.glass-card {
+    padding: 25px;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(7, 31, 61, 0.88),
+            rgba(22, 19, 63, 0.84)
+        );
+
+    border:
+        1px solid rgba(100, 210, 255, 0.18);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 15px 45px rgba(0,0,0,0.20);
+
+    backdrop-filter: blur(18px);
+
+    margin-bottom: 20px;
+}
+
+
+/* =====================================================
+   STAT CARDS
+   ===================================================== */
+
+.stat-card {
+    padding: 22px;
+
+    min-height: 125px;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(5, 31, 60, 0.92),
+            rgba(27, 14, 61, 0.90)
+        );
+
+    border:
+        1px solid rgba(85, 200, 255, 0.20);
+
+    box-shadow:
+        0 8px 35px rgba(0,0,0,0.22),
+        0 0 20px rgba(80,80,255,0.06);
+
+    transition: 0.25s ease;
+}
+
+
+.stat-card:hover {
+    transform: translateY(-4px);
+
+    border-color:
+        rgba(0, 220, 255, 0.50);
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,0.25),
+        0 0 25px rgba(0,180,255,0.18);
+}
+
+
+.stat-label {
+    color: #91b8d9;
+
+    font-size: 0.88rem;
 
     margin-bottom: 8px;
 }
 
-.hero-subtitle {
-    color: #e7ebf3;
-    font-size: 15px;
-    line-height: 1.65;
-}
 
+.stat-value {
+    color: #ffffff;
 
-/* ================= SECTION TITLE ================= */
+    font-size: 1.65rem;
 
-.section-title {
-    font-size: 25px;
-    font-weight: 800;
-
-    color: #ffc96d;
-
-    margin-top: 28px;
-    margin-bottom: 18px;
-}
-
-
-/* ================= METRIC CARD ================= */
-
-.metric-card {
-    background:
-        linear-gradient(
-            145deg,
-            rgba(48, 29, 24, 0.90),
-            rgba(12, 34, 56, 0.94)
-        );
-
-    border:
-        1px solid rgba(255,255,255,0.09);
-
-    border-radius: 19px;
-
-    padding: 20px;
-
-    min-height: 115px;
-
-    text-align: center;
-
-    box-shadow:
-        0 12px 35px rgba(0,0,0,0.30);
-}
-
-.metric-label {
-    color: #91a4ba;
-    font-size: 13px;
-    margin-bottom: 9px;
-}
-
-.metric-value {
-    color: #f4e7d8;
-    font-size: 25px;
     font-weight: 800;
 }
 
 
-/* ================= INPUT CARD ================= */
-
-.input-card {
-    background:
-        linear-gradient(
-            145deg,
-            rgba(27, 30, 62, 0.95),
-            rgba(9, 43, 58, 0.94)
-        );
-
-    border:
-        1px solid rgba(73, 209, 211, 0.13);
-
-    border-radius: 18px;
-
-    padding: 19px;
-
-    margin-bottom: 10px;
-
-    box-shadow:
-        0 10px 30px rgba(0,0,0,0.28);
-}
-
-.input-icon {
-    font-size: 27px;
-}
-
-.input-title {
-    color: #f4f6fa;
-    font-size: 16px;
-    font-weight: 700;
-    margin-top: 5px;
-}
-
-.input-description {
-    color: #8fa4ba;
-    font-size: 12px;
-    margin-top: 4px;
+.stat-accent {
+    color: #55e7ff;
 }
 
 
-/* ================= PREDICTION ================= */
+/* =====================================================
+   PREDICTION CARD
+   ===================================================== */
 
 .prediction-card {
+    padding: 35px;
+
+    margin-top: 20px;
+
+    border-radius: 24px;
+
     background:
-        radial-gradient(
-            circle at 20% 20%,
-            rgba(41, 190, 183, 0.16),
-            transparent 32%
-        ),
         linear-gradient(
             135deg,
-            rgba(10, 55, 65, 0.97),
-            rgba(25, 31, 70, 0.97),
-            rgba(53, 28, 27, 0.96)
+            rgba(0, 105, 145, 0.30),
+            rgba(72, 20, 125, 0.34)
         );
 
     border:
-        1px solid rgba(75, 220, 211, 0.22);
-
-    border-radius: 25px;
-
-    padding: 35px;
-
-    text-align: center;
+        1px solid rgba(0, 225, 255, 0.40);
 
     box-shadow:
-        0 0 55px rgba(38, 194, 188, 0.12),
-        0 20px 55px rgba(0,0,0,0.35);
+        0 0 30px rgba(0, 200, 255, 0.12),
+        0 0 50px rgba(140, 50, 255, 0.12);
 }
 
-.prediction-small {
-    color: #a6b5c7;
-    font-size: 16px;
-}
 
 .prediction-score {
-    font-size: 65px;
-    font-weight: 800;
+    font-size: 3.5rem;
+
+    font-weight: 900;
 
     background:
         linear-gradient(
             90deg,
-            #55dfd1,
-            #72dfa5,
-            #b29dff
+            #53ecff,
+            #8f8aff,
+            #ff72dc
         );
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
-    margin: 7px 0;
-}
-
-.prediction-status {
-    color: #f4dfc8;
-    font-size: 21px;
-    font-weight: 700;
 }
 
 
-/* ================= AI CARD ================= */
+.prediction-label {
+    font-size: 1.25rem;
 
-.ai-card {
-    background:
-        linear-gradient(
-            145deg,
-            rgba(28, 24, 58, 0.96),
-            rgba(8, 42, 57, 0.96)
-        );
+    color: #e8f8ff;
 
-    border:
-        1px solid rgba(136, 121, 255, 0.20);
-
-    border-radius: 20px;
-
-    padding: 26px;
-
-    box-shadow:
-        0 15px 45px rgba(0,0,0,0.32);
+    font-weight: 750;
 }
 
 
-/* ================= BUTTON ================= */
+/* =====================================================
+   BUTTON
+   ===================================================== */
 
 .stButton > button {
     width: 100%;
 
-    min-height: 52px;
+    border-radius: 14px !important;
 
-    border-radius: 14px;
-
-    border: 1px solid rgba(89, 218, 211, 0.25);
+    border:
+        1px solid rgba(0, 220, 255, 0.45) !important;
 
     background:
         linear-gradient(
             90deg,
-            #164d58,
-            #24396e,
-            #4a2c49
-        );
+            #075c86,
+            #3038a6,
+            #702b9c
+        ) !important;
 
-    color: white;
+    color: white !important;
 
-    font-size: 16px;
-    font-weight: 700;
+    font-weight: 800 !important;
+
+    padding: 0.75rem 1rem !important;
 
     box-shadow:
-        0 9px 27px rgba(0,0,0,0.30);
+        0 0 18px rgba(0, 190, 255, 0.18);
+
+    transition: 0.25s ease;
 }
+
 
 .stButton > button:hover {
-    border-color: #62ddd5;
+    border-color: #70efff !important;
 
     box-shadow:
-        0 0 28px rgba(71,210,203,0.22);
+        0 0 25px rgba(0, 210, 255, 0.35),
+        0 0 40px rgba(150, 60, 255, 0.20);
+
+    transform: translateY(-2px);
 }
 
 
-/* ================= INPUTS ================= */
+/* =====================================================
+   INPUT BOXES
+   ===================================================== */
 
 div[data-baseweb="input"] {
-    background: rgba(7, 23, 38, 0.78);
-    border-radius: 10px;
+    background:
+        rgba(5, 22, 48, 0.80) !important;
+
+    border-radius: 12px !important;
+
+    border:
+        1px solid rgba(100, 190, 255, 0.22) !important;
 }
 
-div[data-baseweb="input"] input {
-    color: white !important;
+
+div[data-baseweb="select"] > div {
+    background:
+        rgba(5, 22, 48, 0.80) !important;
+
+    border-radius: 12px !important;
 }
 
 
-/* ================= FOOTER ================= */
+/* =====================================================
+   SLIDER
+   ===================================================== */
+
+div[data-baseweb="slider"] {
+    margin-bottom: 10px;
+}
+
+
+/* =====================================================
+   EXPANDER
+   ===================================================== */
+
+div[data-testid="stExpander"] {
+    background:
+        rgba(7, 25, 55, 0.75) !important;
+
+    border:
+        1px solid rgba(100, 190, 255, 0.18) !important;
+
+    border-radius: 16px !important;
+}
+
+
+/* =====================================================
+   DATAFRAME
+   ===================================================== */
+
+[data-testid="stDataFrame"] {
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    border:
+        1px solid rgba(0, 200, 255, 0.18);
+}
+
+
+/* =====================================================
+   FOOTER
+   ===================================================== */
 
 .footer {
+    margin-top: 50px;
+
+    padding: 25px;
+
     text-align: center;
-    color: #7f91a5;
-    font-size: 12px;
-    padding: 30px 0;
+
+    color: #7293b4;
+
+    border-top:
+        1px solid rgba(100, 180, 255, 0.12);
 }
 
 
-/* ================= HIDE DEFAULT ================= */
+/* =====================================================
+   MOBILE
+   ===================================================== */
 
-#MainMenu {
-    visibility: hidden;
-}
+@media (max-width: 768px) {
 
-footer {
-    visibility: hidden;
+    .hero {
+        padding: 30px 22px;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .prediction-score {
+        font-size: 2.7rem;
+    }
+
 }
 
 </style>
@@ -382,28 +592,36 @@ footer {
 
 
 # =========================================================
-# DATA GENERATION
+# CREATE INTERNAL DATASET
 # =========================================================
 
 @st.cache_data
-def generate_dataset():
+def create_dataset():
 
     np.random.seed(42)
 
     n = 300
 
-    task_rate = np.random.uniform(45, 100, n)
+    task_completion_rate = np.random.uniform(
+        45, 100, n
+    )
 
-    completion_time = np.random.uniform(1.5, 12, n)
+    completion_time = np.random.uniform(
+        1.5, 12, n
+    )
 
-    feedback = np.random.uniform(1, 5, n)
+    feedback_rating = np.random.uniform(
+        1, 5, n
+    )
 
-    attendance = np.random.uniform(55, 100, n)
+    attendance = np.random.uniform(
+        55, 100, n
+    )
 
     performance = (
-        task_rate * 0.45
+        task_completion_rate * 0.45
         + (12 - completion_time) * 3
-        + feedback * 7
+        + feedback_rating * 7
         + attendance * 0.20
         + np.random.normal(0, 3, n)
     )
@@ -414,32 +632,35 @@ def generate_dataset():
         100
     )
 
-    return pd.DataFrame({
-        "Task Completion Rate": task_rate,
+    data = pd.DataFrame({
+        "Task Completion Rate": task_completion_rate,
         "Task Completion Time": completion_time,
-        "Feedback Rating": feedback,
+        "Feedback Rating": feedback_rating,
         "Attendance": attendance,
         "Performance Score": performance
     })
 
+    return data
+
 
 # =========================================================
-# TRAIN MODEL
+# TRAIN RANDOM FOREST
 # =========================================================
 
 @st.cache_resource
 def train_model():
 
-    data = generate_dataset()
+    data = create_dataset()
 
-    features = [
-        "Task Completion Rate",
-        "Task Completion Time",
-        "Feedback Rating",
-        "Attendance"
+    X = data[
+        [
+            "Task Completion Rate",
+            "Task Completion Time",
+            "Feedback Rating",
+            "Attendance"
+        ]
     ]
 
-    X = data[features]
     y = data["Performance Score"]
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -456,9 +677,14 @@ def train_model():
         random_state=42
     )
 
-    model.fit(X_train, y_train)
+    model.fit(
+        X_train,
+        y_train
+    )
 
-    predictions = model.predict(X_test)
+    predictions = model.predict(
+        X_test
+    )
 
     mae = mean_absolute_error(
         y_test,
@@ -480,25 +706,16 @@ def train_model():
     return (
         model,
         data,
-        features,
         mae,
         rmse,
         r2,
+        X_test,
         y_test,
         predictions
     )
 
 
-(
-    model,
-    data,
-    features,
-    mae,
-    rmse,
-    r2,
-    y_test,
-    predictions
-) = train_model()
+model, data, mae, rmse, r2, X_test, y_test, predictions = train_model()
 
 
 # =========================================================
@@ -507,120 +724,65 @@ def train_model():
 
 with st.sidebar:
 
-    st.markdown(
-        "## ⚙️ Dashboard Settings"
-    )
+    st.html("""
+    <div style="
+        text-align:center;
+        padding:10px 0 25px 0;
+    ">
 
-    st.markdown(
-        """
         <div style="
-            color:#8fc5ff;
-            font-size:14px;
-            line-height:1.8;
+            font-size:2rem;
+            margin-bottom:8px;
         ">
-
-        <b>Model</b><br>
-        Random Forest Regression
-
-        <br><br>
-
-        <b>AI Engine</b><br>
-        Groq • GPT-OSS 20B
-
-        <br><br>
-
-        <b>Application</b><br>
-        Streamlit
-
-        <br><br>
-
-        <b>Training Records</b><br>
-        300 simulated interns
-
+            📊
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div style="
+            font-size:1.25rem;
+            font-weight:800;
+            color:#66eaff;
+        ">
+            Intern Performance AI
+        </div>
+
+        <div style="
+            font-size:0.78rem;
+            color:#789abd;
+            margin-top:5px;
+        ">
+            Machine Learning Dashboard
+        </div>
+
+    </div>
+    """)
 
     st.divider()
 
-    st.markdown(
-        """
-        <div style="
-            color:#d5a6ff;
-            font-size:16px;
-            font-weight:700;
-        ">
-        📊 Model Metrics
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("### ⚙️ Model Information")
 
-    st.markdown(
-        f"""
-        <div style="
-            color:#9bc9ff;
-            line-height:2;
-            font-size:14px;
-        ">
-
-        R² Score:
-        <b>{r2:.2f}</b>
-
-        <br>
-
-        MAE:
-        <b>{mae:.2f}</b>
-
-        <br>
-
-        RMSE:
-        <b>{rmse:.2f}</b>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.write("**Algorithm:** Random Forest")
+    st.write("**Task:** Regression")
+    st.write("**Training Records:** 300")
 
     st.divider()
 
-    st.markdown(
-        """
-        <div style="
-            color:#d5a6ff;
-            font-size:15px;
-            font-weight:700;
-        ">
-        🤖 AI Analysis
-        </div>
+    st.markdown("### 🤖 AI Engine")
 
-        <div style="
-            color:#9bc9ff;
-            font-size:13px;
-            line-height:1.6;
-            margin-top:7px;
-        ">
-        AI analysis is securely connected
-        through Streamlit Secrets.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.write("Groq")
+    st.write("GPT OSS 20B")
 
-    st.markdown(
-        """
-        <div style="
-            position:fixed;
-            bottom:15px;
-            left:18px;
-            color:#d5bd70;
-            font-size:13px;
-        ">
-        Build with Streamlit & AI
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.divider()
+
+    st.markdown("### 📈 Model Metrics")
+
+    st.write(f"MAE: {mae:.2f}")
+    st.write(f"RMSE: {rmse:.2f}")
+    st.write(f"R² Score: {r2:.2f}")
+
+    st.divider()
+
+    st.caption(
+        "Internal simulated dataset is used for demonstration."
     )
 
 
@@ -632,13 +794,14 @@ st.html("""
 <div class="hero">
 
     <div class="hero-title">
-        📊 Intern Performance AI
+        Intern Performance AI
     </div>
 
     <div class="hero-subtitle">
-        Machine Learning powered performance prediction using
-        task completion, feedback ratings and attendance —
-        enhanced with Generative AI.
+        Predict intern performance using Machine Learning
+        and generate AI-powered feedback using Groq.
+        The system analyzes task completion rate,
+        completion time, feedback rating, and attendance.
     </div>
 
 </div>
@@ -656,19 +819,19 @@ st.html("""
 """)
 
 
-c1, c2, c3, c4 = st.columns(4)
+col1, col2, col3, col4 = st.columns(4)
 
 
-with c1:
+with col1:
 
     st.html("""
-    <div class="metric-card">
+    <div class="stat-card">
 
-        <div class="metric-label">
-            🤖 Model
+        <div class="stat-label">
+            Model
         </div>
 
-        <div class="metric-value">
+        <div class="stat-value">
             Random Forest
         </div>
 
@@ -676,51 +839,55 @@ with c1:
     """)
 
 
-with c2:
+with col2:
 
-    st.html(f"""
-    <div class="metric-card">
+    st.html("""
+    <div class="stat-card">
 
-        <div class="metric-label">
-            🎯 R² Score
+        <div class="stat-label">
+            Training Records
         </div>
 
-        <div class="metric-value">
-            {r2:.2f}
-        </div>
-
-    </div>
-    """)
-
-
-with c3:
-
-    st.html(f"""
-    <div class="metric-card">
-
-        <div class="metric-label">
-            📉 MAE
-        </div>
-
-        <div class="metric-value">
-            {mae:.2f}
+        <div class="stat-value">
+            <span class="stat-accent">
+                300
+            </span>
         </div>
 
     </div>
     """)
 
 
-with c4:
+with col3:
 
     st.html(f"""
-    <div class="metric-card">
+    <div class="stat-card">
 
-        <div class="metric-label">
-            👥 Training Records
+        <div class="stat-label">
+            R² Score
         </div>
 
-        <div class="metric-value">
-            {len(data)}
+        <div class="stat-value">
+            <span class="stat-accent">
+                {r2:.2f}
+            </span>
+        </div>
+
+    </div>
+    """)
+
+
+with col4:
+
+    st.html("""
+    <div class="stat-card">
+
+        <div class="stat-label">
+            AI Engine
+        </div>
+
+        <div class="stat-value">
+            Groq
         </div>
 
     </div>
@@ -728,12 +895,12 @@ with c4:
 
 
 # =========================================================
-# INTERN ASSESSMENT
+# INPUT SECTION
 # =========================================================
 
 st.html("""
 <div class="section-title">
-    👤 Intern Assessment
+    🧑‍💻 Intern Performance Inputs
 </div>
 """)
 
@@ -741,121 +908,39 @@ st.html("""
 left, right = st.columns(2)
 
 
-# =========================================================
-# LEFT SIDE
-# =========================================================
-
 with left:
-
-    st.html("""
-    <div class="input-card">
-
-        <div class="input-icon">
-            ✅
-        </div>
-
-        <div class="input-title">
-            Task Completion Rate
-        </div>
-
-        <div class="input-description">
-            Percentage of assigned tasks completed successfully.
-        </div>
-
-    </div>
-    """)
 
     task_rate = st.slider(
         "Task Completion Rate (%)",
-        0,
-        100,
-        82
+        min_value=0,
+        max_value=100,
+        value=80
     )
 
-
-    st.html("""
-    <div class="input-card">
-
-        <div class="input-icon">
-            ⏱️
-        </div>
-
-        <div class="input-title">
-            Task Completion Time
-        </div>
-
-        <div class="input-description">
-            Average time required to complete a task.
-        </div>
-
-    </div>
-    """)
-
     completion_time = st.number_input(
-        "Average Completion Time (hours)",
-        min_value=0.5,
-        max_value=50.0,
+        "Average Task Completion Time (hours)",
+        min_value=1.0,
+        max_value=20.0,
         value=5.0,
         step=0.5
     )
 
 
-# =========================================================
-# RIGHT SIDE
-# =========================================================
-
 with right:
 
-    st.html("""
-    <div class="input-card">
-
-        <div class="input-icon">
-            ⭐
-        </div>
-
-        <div class="input-title">
-            Feedback Rating
-        </div>
-
-        <div class="input-description">
-            Average feedback received from supervisors.
-        </div>
-
-    </div>
-    """)
-
     feedback = st.slider(
-        "Feedback Rating (1–5)",
-        1.0,
-        5.0,
-        4.0,
-        0.1
+        "Feedback Rating",
+        min_value=1.0,
+        max_value=5.0,
+        value=4.0,
+        step=0.1
     )
-
-
-    st.html("""
-    <div class="input-card">
-
-        <div class="input-icon">
-            📅
-        </div>
-
-        <div class="input-title">
-            Attendance
-        </div>
-
-        <div class="input-description">
-            Percentage of working days attended.
-        </div>
-
-    </div>
-    """)
 
     attendance = st.slider(
         "Attendance (%)",
-        0,
-        100,
-        88
+        min_value=0,
+        max_value=100,
+        value=90
     )
 
 
@@ -863,10 +948,8 @@ with right:
 # PREDICT BUTTON
 # =========================================================
 
-st.write("")
-
-predict = st.button(
-    "🔮 Predict Intern Performance",
+predict_button = st.button(
+    "🚀 Predict Intern Performance",
     use_container_width=True
 )
 
@@ -875,40 +958,57 @@ predict = st.button(
 # PREDICTION
 # =========================================================
 
-if predict:
+if predict_button:
 
     input_data = pd.DataFrame({
-        "Task Completion Rate": [task_rate],
-        "Task Completion Time": [completion_time],
-        "Feedback Rating": [feedback],
-        "Attendance": [attendance]
+
+        "Task Completion Rate": [
+            task_rate
+        ],
+
+        "Task Completion Time": [
+            completion_time
+        ],
+
+        "Feedback Rating": [
+            feedback
+        ],
+
+        "Attendance": [
+            attendance
+        ]
+
     })
 
-    score = model.predict(input_data)[0]
 
-    score = float(
+    predicted_score = model.predict(
+        input_data
+    )[0]
+
+
+    predicted_score = float(
         np.clip(
-            score,
+            predicted_score,
             0,
             100
         )
     )
 
 
-    if score >= 75:
+    if predicted_score >= 75:
 
-        status = "Likely to Excel"
-        icon = "🚀"
+        category = "Likely to Excel"
+        emoji = "🚀"
 
-    elif score >= 55:
+    elif predicted_score >= 55:
 
-        status = "Average / Developing"
-        icon = "📈"
+        category = "Average / Developing"
+        emoji = "📈"
 
     else:
 
-        status = "Needs Improvement"
-        icon = "⚠️"
+        category = "Needs Improvement"
+        emoji = "⚠️"
 
 
     # =====================================================
@@ -921,27 +1021,24 @@ if predict:
     </div>
     """)
 
+
     st.html(f"""
     <div class="prediction-card">
 
-        <div class="prediction-small">
+        <div style="
+            color:#8fb5d5;
+            font-size:0.95rem;
+            margin-bottom:10px;
+        ">
             Predicted Performance Score
         </div>
 
         <div class="prediction-score">
-            {score:.1f}%
+            {predicted_score:.1f}/100
         </div>
 
-        <div class="prediction-status">
-            {icon} {status}
-        </div>
-
-        <div style="
-            color:#8fa5b8;
-            font-size:13px;
-            margin-top:10px;
-        ">
-            Generated using Random Forest Regression
+        <div class="prediction-label">
+            {emoji} {category}
         </div>
 
     </div>
@@ -949,12 +1046,12 @@ if predict:
 
 
     # =====================================================
-    # SUMMARY
+    # INPUT SUMMARY
     # =====================================================
 
     st.html("""
     <div class="section-title">
-        📋 Assessment Summary
+        📋 Input Summary
     </div>
     """)
 
@@ -964,70 +1061,34 @@ if predict:
 
     with s1:
 
-        st.html(f"""
-        <div class="metric-card">
-
-            <div class="metric-label">
-                Task Completion
-            </div>
-
-            <div class="metric-value">
-                {task_rate}%
-            </div>
-
-        </div>
-        """)
+        st.metric(
+            "Task Completion",
+            f"{task_rate:.0f}%"
+        )
 
 
     with s2:
 
-        st.html(f"""
-        <div class="metric-card">
-
-            <div class="metric-label">
-                Completion Time
-            </div>
-
-            <div class="metric-value">
-                {completion_time:.1f}h
-            </div>
-
-        </div>
-        """)
+        st.metric(
+            "Completion Time",
+            f"{completion_time:.1f} hrs"
+        )
 
 
     with s3:
 
-        st.html(f"""
-        <div class="metric-card">
-
-            <div class="metric-label">
-                Feedback
-            </div>
-
-            <div class="metric-value">
-                {feedback:.1f}/5
-            </div>
-
-        </div>
-        """)
+        st.metric(
+            "Feedback",
+            f"{feedback:.1f}/5"
+        )
 
 
     with s4:
 
-        st.html(f"""
-        <div class="metric-card">
-
-            <div class="metric-label">
-                Attendance
-            </div>
-
-            <div class="metric-value">
-                {attendance}%
-            </div>
-
-        </div>
-        """)
+        st.metric(
+            "Attendance",
+            f"{attendance:.0f}%"
+        )
 
 
     # =====================================================
@@ -1036,12 +1097,11 @@ if predict:
 
     st.html("""
     <div class="section-title">
-        🧠 Generative AI Analysis
+        🤖 AI-Powered Performance Analysis
     </div>
     """)
 
 
-    # Get key from Streamlit Secrets ONLY
     try:
 
         groq_key = st.secrets.get(
@@ -1062,8 +1122,9 @@ if predict:
                 api_key=groq_key
             )
 
+
             prompt = f"""
-You are an expert internship performance analyst.
+You are an intern performance analyst.
 
 Analyze this machine-learning prediction.
 
@@ -1071,10 +1132,10 @@ Task Completion Rate: {task_rate}%
 Average Task Completion Time: {completion_time} hours
 Feedback Rating: {feedback}/5
 Attendance: {attendance}%
-Predicted Performance Score: {score:.1f}%
-Performance Category: {status}
+Predicted Performance Score: {predicted_score:.1f}/100
+Prediction Category: {category}
 
-Give a concise professional analysis.
+Provide a concise professional analysis.
 
 Use these sections:
 
@@ -1086,148 +1147,138 @@ Use these sections:
 
 ### Practical Recommendations
 
-Focus only on the measurable performance data.
-Do not make assumptions about personality,
-health, background, or sensitive characteristics.
+Give 3 practical recommendations.
+
+Do not make assumptions about sensitive personal characteristics.
 """
 
+
             response = client.chat.completions.create(
+
                 model="openai/gpt-oss-20b",
+
                 messages=[
+
                     {
                         "role": "system",
-                        "content": (
-                            "You are a professional HR analytics "
-                            "assistant."
-                        )
+                        "content":
+                        "You are a professional intern performance analyst."
                     },
+
                     {
                         "role": "user",
                         "content": prompt
                     }
+
                 ],
+
                 temperature=0.4,
+
                 max_tokens=700
             )
+
 
             ai_result = response.choices[0].message.content
 
 
-            st.html("""
-            <div class="ai-card">
-            </div>
-            """)
-
-            st.markdown(
-                ai_result
-            )
+            st.markdown(ai_result)
 
 
-        except Exception as error:
+        except Exception as e:
 
             st.error(
-                "AI analysis could not be generated. "
-                "Please check your Groq API configuration."
+                "Groq AI could not generate the analysis."
             )
+
+            st.caption(
+                f"Error: {str(e)}"
+            )
+
 
     else:
 
+        st.warning(
+            "Groq API key is not configured."
+        )
+
         st.info(
-            "AI analysis is not configured yet. "
-            "Add GROQ_API_KEY to Streamlit Secrets."
+            "Add GROQ_API_KEY to Streamlit Secrets "
+            "to enable AI analysis."
         )
 
 
-# =========================================================
-# FEATURE IMPORTANCE
-# =========================================================
+    # =====================================================
+    # FEATURE IMPORTANCE
+    # =====================================================
 
-st.html("""
-<div class="section-title">
-    📊 Feature Importance
-</div>
-""")
-
-
-importance = pd.DataFrame({
-    "Feature": features,
-    "Importance": model.feature_importances_
-})
-
-importance = importance.sort_values(
-    "Importance",
-    ascending=True
-)
+    st.html("""
+    <div class="section-title">
+        🔍 Feature Importance
+    </div>
+    """)
 
 
-fig = plt.figure(
-    figsize=(10, 4.5)
-)
+    importance = pd.DataFrame({
 
-plt.barh(
-    importance["Feature"],
-    importance["Importance"]
-)
+        "Feature": [
 
-plt.xlabel(
-    "Relative Importance"
-)
+            "Task Completion Rate",
+            "Task Completion Time",
+            "Feedback Rating",
+            "Attendance"
 
-plt.title(
-    "Random Forest Feature Importance"
-)
+        ],
 
-plt.tight_layout()
+        "Importance":
+            model.feature_importances_
 
-st.pyplot(
-    fig,
-    use_container_width=True
-)
+    }).sort_values(
+        "Importance",
+        ascending=False
+    )
 
-plt.close(fig)
+
+    st.bar_chart(
+        importance.set_index("Feature")
+    )
 
 
 # =========================================================
 # MODEL VALIDATION
 # =========================================================
 
-with st.expander("📈 View Model Validation"):
+with st.expander(
+    "📊 View Model Validation"
+):
 
-    comparison = pd.DataFrame({
-        "Actual": y_test.values,
-        "Predicted": predictions
+    validation_df = pd.DataFrame({
+
+        "Actual Score":
+            y_test.values,
+
+        "Predicted Score":
+            predictions
+
     })
 
-    fig2 = plt.figure(
-        figsize=(9, 5)
-    )
 
-    plt.scatter(
-        comparison["Actual"],
-        comparison["Predicted"],
-        alpha=0.7
-    )
-
-    plt.xlabel(
-        "Actual Performance"
-    )
-
-    plt.ylabel(
-        "Predicted Performance"
-    )
-
-    plt.title(
-        "Actual vs Predicted Performance"
-    )
-
-    plt.tight_layout()
-
-    st.pyplot(
-        fig2,
+    st.dataframe(
+        validation_df.head(20),
         use_container_width=True
     )
 
-    plt.close(fig2)
+
+    st.write(
+        f"**Mean Absolute Error:** {mae:.2f}"
+    )
+
+    st.write(
+        f"**Root Mean Squared Error:** {rmse:.2f}"
+    )
+
+    st.write(
+        f"**R² Score:** {r2:.2f}"
+    )
 
 
 # =========================================================
@@ -1237,17 +1288,25 @@ with st.expander("📈 View Model Validation"):
 st.html("""
 <div class="footer">
 
-    <b>Intern Performance AI</b>
-    &nbsp; • &nbsp;
-    Random Forest
-    &nbsp; • &nbsp;
-    Generative AI
-    &nbsp; • &nbsp;
-    Streamlit
+    <div style="
+        font-size:1rem;
+        font-weight:700;
+        color:#a9ddff;
+        margin-bottom:7px;
+    ">
+        Intern Performance AI
+    </div>
 
-    <br><br>
+    <div>
+        Machine Learning • Random Forest • Groq AI • Streamlit
+    </div>
 
-    Built with Machine Learning & AI
+    <div style="
+        margin-top:8px;
+        font-size:0.75rem;
+    ">
+        Developed as part of an AI/ML internship project.
+    </div>
 
 </div>
 """)
