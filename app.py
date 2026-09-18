@@ -6,11 +6,11 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from groq import Groq
-import os
 
-# ---------------------------------------------------------
-# PAGE CONFIG
-# ---------------------------------------------------------
+
+# =========================================================
+# PAGE CONFIGURATION
+# =========================================================
 
 st.set_page_config(
     page_title="Intern Performance AI",
@@ -19,152 +19,451 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ---------------------------------------------------------
+
+# =========================================================
 # CUSTOM CSS
-# ---------------------------------------------------------
+# =========================================================
 
 st.markdown("""
 <style>
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
+
 .stApp {
     background:
-        radial-gradient(circle at 10% 10%, rgba(67, 42, 30, 0.35), transparent 35%),
-        radial-gradient(circle at 90% 20%, rgba(20, 42, 70, 0.45), transparent 35%),
-        linear-gradient(135deg, #090d14 0%, #111827 48%, #1b120e 100%);
-    color: #f5f1eb;
+        radial-gradient(
+            circle at 10% 15%,
+            rgba(44, 117, 108, 0.45),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 88% 25%,
+            rgba(27, 68, 130, 0.55),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 70% 85%,
+            rgba(92, 48, 34, 0.42),
+            transparent 30%
+        ),
+        linear-gradient(
+            135deg,
+            #071018 0%,
+            #0b1724 42%,
+            #111b2d 70%,
+            #1b100d 100%
+        );
+
+    color: #f4f7fb;
 }
 
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-    max-width: 1400px;
-}
 
-/* Main title */
-
-.hero {
-    padding: 30px;
-    border-radius: 24px;
-    background: linear-gradient(
-        135deg,
-        rgba(42, 27, 21, 0.94),
-        rgba(12, 29, 52, 0.94)
-    );
-    border: 1px solid rgba(190, 160, 130, 0.18);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-    margin-bottom: 25px;
-}
-
-.hero h1 {
-    font-size: 42px;
-    margin-bottom: 8px;
-    color: #f5e9dc;
-}
-
-.hero p {
-    font-size: 17px;
-    color: #b8c2cf;
-}
-
-/* Cards */
-
-.card {
-    background: linear-gradient(
-        145deg,
-        rgba(48, 30, 22, 0.78),
-        rgba(14, 31, 53, 0.82)
-    );
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 22px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-    margin-bottom: 20px;
-}
-
-.metric-card {
-    background: linear-gradient(
-        135deg,
-        rgba(53, 33, 23, 0.95),
-        rgba(14, 35, 60, 0.95)
-    );
-    border: 1px solid rgba(214, 184, 155, 0.15);
-    border-radius: 18px;
-    padding: 20px;
-    text-align: center;
-    min-height: 125px;
-}
-
-.metric-title {
-    color: #9eabbc;
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.metric-value {
-    color: #f3e8dc;
-    font-size: 30px;
-    font-weight: 700;
-}
-
-/* Section headers */
-
-.section-title {
-    font-size: 25px;
-    font-weight: 700;
-    color: #ead8c8;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
-
-/* Buttons */
-
-.stButton > button {
-    width: 100%;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: linear-gradient(135deg, #4a3025, #173452);
-    color: white;
-    font-weight: 600;
-    padding: 12px;
-}
-
-.stButton > button:hover {
-    border-color: #b89a82;
-    color: white;
-}
-
-/* Inputs */
-
-div[data-baseweb="input"] > div,
-div[data-baseweb="select"] > div {
-    background-color: rgba(13, 25, 40, 0.85);
-    border-radius: 10px;
-}
-
-.stTextInput input,
-.stNumberInput input {
-    color: white !important;
-}
-
-/* Sidebar */
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
 
 section[data-testid="stSidebar"] {
-    background: linear-gradient(
-        180deg,
-        #120d0a,
-        #0d1b2d
-    );
+    background:
+        linear-gradient(
+            180deg,
+            #11143b 0%,
+            #15163e 45%,
+            #10172f 100%
+        );
+
     border-right: 1px solid rgba(255,255,255,0.08);
 }
 
-/* Dataframe */
-
-div[data-testid="stDataFrame"] {
-    border-radius: 15px;
-    overflow: hidden;
+section[data-testid="stSidebar"] > div {
+    padding-top: 1.5rem;
 }
 
-/* Hide default menu */
+.sidebar-title {
+    font-size: 23px;
+    font-weight: 800;
+    color: #f5f7ff;
+    margin-bottom: 18px;
+}
+
+.sidebar-section {
+    color: #d4a8ff;
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+
+.sidebar-info {
+    color: #9cc8ff;
+    line-height: 1.8;
+    font-size: 14px;
+}
+
+.sidebar-footer {
+    position: fixed;
+    bottom: 18px;
+    left: 20px;
+    color: #d6bd76;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   MAIN CONTAINER
+   ========================================================= */
+
+.block-container {
+    max-width: 1450px;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(9, 50, 68, 0.95),
+            rgba(18, 32, 73, 0.96),
+            rgba(45, 23, 67, 0.94)
+        );
+
+    border: 1px solid rgba(77, 214, 214, 0.15);
+    border-radius: 22px;
+
+    padding: 25px 30px;
+
+    box-shadow:
+        0 15px 50px rgba(0,0,0,0.35),
+        0 0 35px rgba(0, 174, 190, 0.12);
+
+    margin-bottom: 25px;
+}
+
+.hero-title {
+    font-size: 36px;
+    font-weight: 800;
+
+    background:
+        linear-gradient(
+            90deg,
+            #45d5d0,
+            #66d7a9,
+            #a58aff
+        );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    margin-bottom: 8px;
+}
+
+.hero-subtitle {
+    color: #e6e9f0;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   SECTION TITLES
+   ========================================================= */
+
+.section-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-top: 25px;
+    margin-bottom: 17px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffca70,
+            #ffc35c,
+            #70d7d2
+        );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+
+/* =========================================================
+   GLASS CARDS
+   ========================================================= */
+
+.glass-card {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(47, 29, 24, 0.82),
+            rgba(11, 39, 61, 0.86)
+        );
+
+    border:
+        1px solid rgba(255,255,255,0.09);
+
+    border-radius: 20px;
+
+    padding: 22px;
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,0.30),
+        inset 0 1px 0 rgba(255,255,255,0.03);
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   INPUT CARDS
+   ========================================================= */
+
+.input-card {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(28, 29, 63, 0.94),
+            rgba(10, 40, 56, 0.92)
+        );
+
+    border: 1px solid rgba(79, 207, 211, 0.14);
+
+    border-radius: 18px;
+
+    padding: 18px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.28);
+}
+
+.input-icon {
+    font-size: 26px;
+}
+
+.input-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f1f4fa;
+    margin-top: 6px;
+}
+
+.input-description {
+    font-size: 12px;
+    color: #8fa5bd;
+}
+
+
+/* =========================================================
+   METRIC CARDS
+   ========================================================= */
+
+.metric-card {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(43, 27, 23, 0.92),
+            rgba(13, 35, 58, 0.95)
+        );
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 18px;
+
+    padding: 18px;
+
+    text-align: center;
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,0.25);
+}
+
+.metric-label {
+    color: #91a3b8;
+    font-size: 13px;
+    margin-bottom: 7px;
+}
+
+.metric-value {
+    color: #f3e5d7;
+    font-size: 27px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   PREDICTION RESULT
+   ========================================================= */
+
+.prediction-card {
+    background:
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(30, 180, 171, 0.18),
+            transparent 30%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(14, 53, 65, 0.95),
+            rgba(26, 28, 65, 0.96),
+            rgba(50, 27, 25, 0.94)
+        );
+
+    border:
+        1px solid rgba(83, 220, 210, 0.22);
+
+    border-radius: 25px;
+
+    padding: 35px;
+
+    text-align: center;
+
+    box-shadow:
+        0 0 50px rgba(26, 190, 187, 0.12),
+        0 20px 50px rgba(0,0,0,0.35);
+}
+
+.prediction-score {
+    font-size: 64px;
+    font-weight: 800;
+
+    background:
+        linear-gradient(
+            90deg,
+            #55e0d0,
+            #76dfa7,
+            #b4a2ff
+        );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.prediction-status {
+    font-size: 21px;
+    font-weight: 700;
+    color: #f4dfca;
+}
+
+
+/* =========================================================
+   AI CARD
+   ========================================================= */
+
+.ai-card {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(26, 23, 57, 0.94),
+            rgba(9, 42, 58, 0.95)
+        );
+
+    border: 1px solid rgba(143, 126, 255, 0.18);
+
+    border-radius: 20px;
+
+    padding: 25px;
+
+    box-shadow:
+        0 15px 45px rgba(0,0,0,0.30);
+}
+
+
+/* =========================================================
+   BUTTON
+   ========================================================= */
+
+.stButton > button {
+    width: 100%;
+
+    min-height: 50px;
+
+    border-radius: 13px;
+
+    border: 1px solid rgba(91, 222, 215, 0.25);
+
+    background:
+        linear-gradient(
+            90deg,
+            #164b56,
+            #24396d,
+            #4b2d48
+        );
+
+    color: white;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.30);
+
+    transition: 0.2s ease;
+}
+
+.stButton > button:hover {
+    border-color: #66ddd4;
+
+    box-shadow:
+        0 0 25px rgba(70,210,204,0.20);
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   SLIDERS
+   ========================================================= */
+
+div[data-testid="stSlider"] {
+    padding-top: 4px;
+}
+
+
+/* =========================================================
+   NUMBER INPUT
+   ========================================================= */
+
+div[data-baseweb="input"] {
+    background: rgba(7, 22, 36, 0.75);
+    border-radius: 10px;
+}
+
+div[data-baseweb="input"] input {
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SELECT BOX
+   ========================================================= */
+
+div[data-baseweb="select"] > div {
+    background: rgba(7, 22, 36, 0.80);
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   FILE / DEFAULT STREAMLIT ELEMENTS
+   ========================================================= */
+
+[data-testid="stMetric"] {
+    background: transparent;
+}
+
+
+/* =========================================================
+   HIDE STREAMLIT BRANDING
+   ========================================================= */
 
 #MainMenu {
     visibility: hidden;
@@ -174,417 +473,680 @@ footer {
     visibility: hidden;
 }
 
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.custom-footer {
+    text-align: center;
+    color: #8392a5;
+    font-size: 12px;
+    padding-top: 30px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
 
-# ---------------------------------------------------------
-# HEADER
-# ---------------------------------------------------------
-
-st.markdown("""
-<div class="hero">
-
-<h1>📊 Intern Performance AI</h1>
-
-<p>
-Machine Learning powered performance prediction using task completion,
-feedback ratings and attendance — enhanced with Generative AI.
-</p>
-
-</div>
-""", unsafe_allow_html=True)
-
-
-# ---------------------------------------------------------
-# SIDEBAR
-# ---------------------------------------------------------
-
-st.sidebar.markdown("## ⚙️ Dashboard Settings")
-
-st.sidebar.markdown("""
-**Model:** Random Forest Regression  
-**AI:** Groq  
-**Application:** Streamlit  
-**Purpose:** Intern Performance Prediction
-""")
-
-st.sidebar.divider()
-
-groq_key = st.sidebar.text_input(
-    "🔑 Groq API Key",
-    type="password",
-    placeholder="Enter your Groq API key"
-)
-
-st.sidebar.caption(
-    "Your API key is used only for the current session."
-)
-
-
-# ---------------------------------------------------------
-# SAMPLE DATA
-# ---------------------------------------------------------
+# =========================================================
+# GENERATE INTERNAL DATASET
+# =========================================================
 
 @st.cache_data
-def create_sample_data():
+def generate_dataset():
 
     np.random.seed(42)
 
-    n = 150
+    number_of_interns = 300
 
-    task_completion_rate = np.random.uniform(45, 100, n)
+    task_completion_rate = np.random.uniform(
+        45, 100, number_of_interns
+    )
 
-    task_completion_time = np.random.uniform(1, 12, n)
+    task_completion_time = np.random.uniform(
+        1.5, 12, number_of_interns
+    )
 
-    feedback_rating = np.random.uniform(1, 5, n)
+    feedback_rating = np.random.uniform(
+        1, 5, number_of_interns
+    )
 
-    attendance = np.random.uniform(55, 100, n)
+    attendance = np.random.uniform(
+        55, 100, number_of_interns
+    )
 
     performance = (
         task_completion_rate * 0.45
-        + (12 - task_completion_time) * 3
-        + feedback_rating * 7
+        + (12 - task_completion_time) * 3.0
+        + feedback_rating * 7.0
         + attendance * 0.20
-        + np.random.normal(0, 3, n)
+        + np.random.normal(0, 3, number_of_interns)
     )
 
-    performance = np.clip(performance, 0, 100)
+    performance = np.clip(
+        performance,
+        0,
+        100
+    )
 
-    df = pd.DataFrame({
-        "Task Completion Rate (%)": task_completion_rate.round(2),
-        "Task Completion Time (hours)": task_completion_time.round(2),
-        "Feedback Rating": feedback_rating.round(2),
-        "Attendance (%)": attendance.round(2),
-        "Performance Score": performance.round(2)
+    dataset = pd.DataFrame({
+        "Task Completion Rate": task_completion_rate,
+        "Task Completion Time": task_completion_time,
+        "Feedback Rating": feedback_rating,
+        "Attendance": attendance,
+        "Performance Score": performance
     })
 
-    return df
+    return dataset
 
 
-# ---------------------------------------------------------
-# DATA SECTION
-# ---------------------------------------------------------
+# =========================================================
+# TRAIN RANDOM FOREST
+# =========================================================
+
+@st.cache_resource
+def train_model():
+
+    data = generate_dataset()
+
+    features = [
+        "Task Completion Rate",
+        "Task Completion Time",
+        "Feedback Rating",
+        "Attendance"
+    ]
+
+    X = data[features]
+
+    y = data["Performance Score"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.20,
+        random_state=42
+    )
+
+    model = RandomForestRegressor(
+        n_estimators=200,
+        max_depth=10,
+        min_samples_split=4,
+        random_state=42
+    )
+
+    model.fit(
+        X_train,
+        y_train
+    )
+
+    predictions = model.predict(X_test)
+
+    mae = mean_absolute_error(
+        y_test,
+        predictions
+    )
+
+    rmse = np.sqrt(
+        mean_squared_error(
+            y_test,
+            predictions
+        )
+    )
+
+    r2 = r2_score(
+        y_test,
+        predictions
+    )
+
+    return (
+        model,
+        data,
+        features,
+        mae,
+        rmse,
+        r2,
+        y_test,
+        predictions
+    )
+
+
+(
+    model,
+    data,
+    features,
+    mae,
+    rmse,
+    r2,
+    y_test,
+    predictions
+) = train_model()
+
+
+# =========================================================
+# SIDEBAR
+# =========================================================
+
+with st.sidebar:
+
+    st.markdown(
+        '<div class="sidebar-title">⚙️ Dashboard Settings</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f"""
+        <div class="sidebar-info">
+
+        <b>Model</b><br>
+        Random Forest Regression
+
+        <br><br>
+
+        <b>AI Engine</b><br>
+        Groq • GPT-OSS 20B
+
+        <br><br>
+
+        <b>Application</b><br>
+        Streamlit
+
+        <br><br>
+
+        <b>Training Records</b><br>
+        {len(data)} simulated interns
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="sidebar-section">🔑 API Configuration</div>',
+        unsafe_allow_html=True
+    )
+
+    groq_key = st.text_input(
+        "Groq API Key",
+        type="password",
+        placeholder="Enter your Groq API key",
+        label_visibility="collapsed"
+    )
+
+    st.caption(
+        "Used only during the current session."
+    )
+
+    st.divider()
+
+    st.markdown(
+        """
+        <div class="sidebar-info">
+
+        <b>Model Metrics</b><br><br>
+
+        R² Score:
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.write(f"**{r2:.2f}**")
+
+    st.markdown(
+        f"""
+        <div class="sidebar-info">
+
+        MAE:
+        <b>{mae:.2f}</b><br><br>
+
+        RMSE:
+        <b>{rmse:.2f}</b>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="sidebar-footer">Build with Streamlit & AI</div>',
+        unsafe_allow_html=True
+    )
+
+
+# =========================================================
+# HERO
+# =========================================================
 
 st.markdown(
-    '<div class="section-title">📁 Training Data</div>',
-    unsafe_allow_html=True
-)
+    """
+    <div class="hero">
 
-col1, col2 = st.columns([1, 1])
+        <div class="hero-title">
+            📊 Intern Performance AI
+        </div>
 
-with col1:
+        <div class="hero-subtitle">
+            Machine Learning powered performance prediction using
+            task completion, feedback ratings and attendance —
+            enhanced with Generative AI.
+        </div>
 
-    st.markdown("""
-    <div class="card">
-    <b>Use Sample Dataset</b><br>
-    Train the model immediately using generated intern data.
     </div>
-    """, unsafe_allow_html=True)
-
-    use_sample = st.button(
-        "🚀 Load Sample Dataset",
-        use_container_width=True
-    )
-
-with col2:
-
-    uploaded_file = st.file_uploader(
-        "Upload your CSV dataset",
-        type=["csv"]
-    )
-
-
-if uploaded_file is not None:
-
-    data = pd.read_csv(uploaded_file)
-    st.success("CSV dataset loaded successfully.")
-
-elif use_sample or "data" not in st.session_state:
-
-    data = create_sample_data()
-    st.session_state["data"] = data
-
-else:
-
-    data = st.session_state["data"]
-
-
-# ---------------------------------------------------------
-# DATA PREVIEW
-# ---------------------------------------------------------
-
-st.markdown(
-    '<div class="section-title">🔎 Dataset Preview</div>',
+    """,
     unsafe_allow_html=True
 )
 
-st.dataframe(
-    data.head(10),
-    use_container_width=True,
-    hide_index=True
-)
 
-
-# ---------------------------------------------------------
-# CHECK REQUIRED COLUMNS
-# ---------------------------------------------------------
-
-required_columns = [
-    "Task Completion Rate (%)",
-    "Task Completion Time (hours)",
-    "Feedback Rating",
-    "Attendance (%)",
-    "Performance Score"
-]
-
-missing_columns = [
-    col for col in required_columns
-    if col not in data.columns
-]
-
-if missing_columns:
-
-    st.error(
-        "Missing required columns: "
-        + ", ".join(missing_columns)
-    )
-
-    st.stop()
-
-
-# ---------------------------------------------------------
-# TRAIN MODEL
-# ---------------------------------------------------------
-
-features = [
-    "Task Completion Rate (%)",
-    "Task Completion Time (hours)",
-    "Feedback Rating",
-    "Attendance (%)"
-]
-
-X = data[features]
-y = data["Performance Score"]
-
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.20,
-    random_state=42
-)
-
-
-model = RandomForestRegressor(
-    n_estimators=200,
-    max_depth=10,
-    min_samples_split=4,
-    random_state=42
-)
-
-model.fit(X_train, y_train)
-
-
-# ---------------------------------------------------------
-# MODEL EVALUATION
-# ---------------------------------------------------------
-
-predictions = model.predict(X_test)
-
-mae = mean_absolute_error(y_test, predictions)
-
-rmse = np.sqrt(
-    mean_squared_error(y_test, predictions)
-)
-
-r2 = r2_score(y_test, predictions)
-
+# =========================================================
+# MODEL OVERVIEW
+# =========================================================
 
 st.markdown(
-    '<div class="section-title">🤖 Model Performance</div>',
+    '<div class="section-title">📈 Model Overview</div>',
     unsafe_allow_html=True
 )
 
-m1, m2, m3 = st.columns(3)
+c1, c2, c3, c4 = st.columns(4)
 
-with m1:
+with c1:
+
     st.markdown(
         f"""
         <div class="metric-card">
-        <div class="metric-title">R² Score</div>
-        <div class="metric-value">{r2:.2f}</div>
+
+            <div class="metric-label">
+                🤖 Model
+            </div>
+
+            <div class="metric-value">
+                Random Forest
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
-with m2:
+with c2:
+
     st.markdown(
         f"""
         <div class="metric-card">
-        <div class="metric-title">MAE</div>
-        <div class="metric-value">{mae:.2f}</div>
+
+            <div class="metric-label">
+                🎯 R² Score
+            </div>
+
+            <div class="metric-value">
+                {r2:.2f}
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
-with m3:
+with c3:
+
     st.markdown(
         f"""
         <div class="metric-card">
-        <div class="metric-title">RMSE</div>
-        <div class="metric-value">{rmse:.2f}</div>
+
+            <div class="metric-label">
+                📉 MAE
+            </div>
+
+            <div class="metric-value">
+                {mae:.2f}
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with c4:
+
+    st.markdown(
+        f"""
+        <div class="metric-card">
+
+            <div class="metric-label">
+                👥 Training Records
+            </div>
+
+            <div class="metric-value">
+                {len(data)}
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
 
-# ---------------------------------------------------------
-# FEATURE IMPORTANCE
-# ---------------------------------------------------------
+# =========================================================
+# INTERN ASSESSMENT
+# =========================================================
 
 st.markdown(
-    '<div class="section-title">📈 Feature Importance</div>',
+    '<div class="section-title">👤 Intern Assessment</div>',
     unsafe_allow_html=True
 )
 
-importance_df = pd.DataFrame({
-    "Feature": features,
-    "Importance": model.feature_importances_
-})
-
-importance_df = importance_df.sort_values(
-    "Importance",
-    ascending=True
-)
-
-fig = plt.figure(figsize=(9, 4))
-
-plt.barh(
-    importance_df["Feature"],
-    importance_df["Importance"]
-)
-
-plt.xlabel("Importance")
-plt.title("What Influences Intern Performance?")
-
-plt.tight_layout()
-
-st.pyplot(fig)
-
-plt.close(fig)
+left, right = st.columns(2)
 
 
 # ---------------------------------------------------------
-# PREDICTION SECTION
+# LEFT INPUTS
 # ---------------------------------------------------------
 
-st.markdown(
-    '<div class="section-title">🎯 Predict Intern Performance</div>',
-    unsafe_allow_html=True
-)
+with left:
 
-p1, p2 = st.columns(2)
+    st.markdown(
+        """
+        <div class="input-card">
 
-with p1:
+            <div class="input-icon">✅</div>
+
+            <div class="input-title">
+                Task Completion Rate
+            </div>
+
+            <div class="input-description">
+                Percentage of assigned tasks completed successfully
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     task_rate = st.slider(
         "Task Completion Rate (%)",
-        min_value=0,
-        max_value=100,
-        value=80
+        0,
+        100,
+        82,
+        key="task_rate"
+    )
+
+    st.markdown(
+        """
+        <div class="input-card">
+
+            <div class="input-icon">⏱️</div>
+
+            <div class="input-title">
+                Task Completion Time
+            </div>
+
+            <div class="input-description">
+                Average time required to complete an assigned task
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     completion_time = st.number_input(
-        "Average Task Completion Time (hours)",
-        min_value=0.1,
+        "Average Completion Time (hours)",
+        min_value=0.5,
         max_value=50.0,
         value=5.0,
-        step=0.5
+        step=0.5,
+        key="completion_time"
     )
 
-with p2:
+
+# ---------------------------------------------------------
+# RIGHT INPUTS
+# ---------------------------------------------------------
+
+with right:
+
+    st.markdown(
+        """
+        <div class="input-card">
+
+            <div class="input-icon">⭐</div>
+
+            <div class="input-title">
+                Feedback Rating
+            </div>
+
+            <div class="input-description">
+                Average feedback received from supervisors
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     feedback = st.slider(
-        "Feedback Rating",
-        min_value=1.0,
-        max_value=5.0,
-        value=4.0,
-        step=0.1
+        "Feedback Rating (1–5)",
+        1.0,
+        5.0,
+        4.0,
+        0.1,
+        key="feedback"
     )
 
-    attendance_value = st.slider(
+    st.markdown(
+        """
+        <div class="input-card">
+
+            <div class="input-icon">📅</div>
+
+            <div class="input-title">
+                Attendance
+            </div>
+
+            <div class="input-description">
+                Percentage of working days attended
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    attendance = st.slider(
         "Attendance (%)",
-        min_value=0,
-        max_value=100,
-        value=85
+        0,
+        100,
+        88,
+        key="attendance"
     )
 
 
-predict_button = st.button(
+# =========================================================
+# PREDICT BUTTON
+# =========================================================
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+predict = st.button(
     "🔮 Predict Intern Performance",
     use_container_width=True
 )
 
 
-if predict_button:
+# =========================================================
+# PREDICTION
+# =========================================================
+
+if predict:
 
     input_data = pd.DataFrame({
-        "Task Completion Rate (%)": [task_rate],
-        "Task Completion Time (hours)": [completion_time],
+        "Task Completion Rate": [task_rate],
+        "Task Completion Time": [completion_time],
         "Feedback Rating": [feedback],
-        "Attendance (%)": [attendance_value]
+        "Attendance": [attendance]
     })
 
-    predicted_score = model.predict(input_data)[0]
+    predicted_score = model.predict(
+        input_data
+    )[0]
 
-    predicted_score = np.clip(
-        predicted_score,
-        0,
-        100
+    predicted_score = float(
+        np.clip(
+            predicted_score,
+            0,
+            100
+        )
     )
 
-    # Classification based on predicted score
     if predicted_score >= 75:
+
         status = "Likely to Excel"
-        emoji = "🚀"
+        icon = "🚀"
+
     elif predicted_score >= 55:
+
         status = "Average / Developing"
-        emoji = "📈"
+        icon = "📈"
+
     else:
+
         status = "Needs Improvement"
-        emoji = "⚠️"
+        icon = "⚠️"
+
+
+    # =====================================================
+    # RESULT
+    # =====================================================
+
+    st.markdown(
+        '<div class="section-title">🎯 Prediction Result</div>',
+        unsafe_allow_html=True
+    )
 
     st.markdown(
         f"""
-        <div class="card" style="text-align:center;">
+        <div class="prediction-card">
 
-        <h2>{emoji} Predicted Performance</h2>
+            <div style="
+                font-size:18px;
+                color:#a9b8ca;
+                margin-bottom:5px;
+            ">
+                Predicted Performance Score
+            </div>
 
-        <h1 style="font-size:55px;">
-        {predicted_score:.1f}%
-        </h1>
+            <div class="prediction-score">
+                {predicted_score:.1f}%
+            </div>
 
-        <h3>{status}</h3>
+            <div class="prediction-status">
+                {icon} {status}
+            </div>
 
-        <p>
-        Prediction generated using Random Forest Regression.
-        </p>
+            <div style="
+                margin-top:12px;
+                color:#91a5b9;
+                font-size:13px;
+            ">
+                Generated using Random Forest Regression
+            </div>
 
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    # -----------------------------------------------------
-    # AI ANALYSIS
-    # -----------------------------------------------------
+
+    # =====================================================
+    # INPUT SUMMARY
+    # =====================================================
 
     st.markdown(
-        '<div class="section-title">🧠 AI Performance Analysis</div>',
+        '<div class="section-title">📋 Assessment Summary</div>',
+        unsafe_allow_html=True
+    )
+
+    s1, s2, s3, s4 = st.columns(4)
+
+    with s1:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+
+            <div class="metric-label">
+            Task Completion
+            </div>
+
+            <div class="metric-value">
+            {task_rate}%
+            </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with s2:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+
+            <div class="metric-label">
+            Completion Time
+            </div>
+
+            <div class="metric-value">
+            {completion_time:.1f}h
+            </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with s3:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+
+            <div class="metric-label">
+            Feedback
+            </div>
+
+            <div class="metric-value">
+            {feedback:.1f}/5
+            </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with s4:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+
+            <div class="metric-label">
+            Attendance
+            </div>
+
+            <div class="metric-value">
+            {attendance}%
+            </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+    # =====================================================
+    # GROQ AI ANALYSIS
+    # =====================================================
+
+    st.markdown(
+        '<div class="section-title">🧠 Generative AI Analysis</div>',
         unsafe_allow_html=True
     )
 
@@ -597,27 +1159,36 @@ if predict_button:
             )
 
             prompt = f"""
-You are an HR analytics assistant.
+You are an expert internship performance analyst.
 
-Analyze this intern performance prediction.
+Analyze the following machine-learning prediction.
 
 Task Completion Rate: {task_rate}%
 Average Task Completion Time: {completion_time} hours
 Feedback Rating: {feedback}/5
-Attendance: {attendance_value}%
+Attendance: {attendance}%
 Predicted Performance Score: {predicted_score:.1f}%
-Performance Category: {status}
+Category: {status}
 
-Give a concise professional analysis.
+Provide a professional and concise analysis.
 
-Include:
-1. Performance summary
-2. Main strengths
-3. Areas that may need improvement
-4. Two practical recommendations
+Use exactly these sections:
 
-Do not make sensitive or personal assumptions.
-Use a professional and supportive tone.
+### Performance Summary
+Explain the overall prediction.
+
+### Key Strengths
+Mention the strongest measurable factors.
+
+### Areas to Improve
+Mention measurable areas that could improve.
+
+### Practical Recommendations
+Give 2 or 3 actionable recommendations.
+
+Do not make assumptions about personality, health,
+background, or other sensitive personal characteristics.
+Focus only on the provided performance data.
 """
 
             response = client.chat.completions.create(
@@ -625,7 +1196,11 @@ Use a professional and supportive tone.
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an expert HR analytics assistant."
+                        "content": (
+                            "You are a professional HR analytics "
+                            "assistant focused on objective "
+                            "performance analysis."
+                        )
                     },
                     {
                         "role": "user",
@@ -633,103 +1208,136 @@ Use a professional and supportive tone.
                     }
                 ],
                 temperature=0.4,
-                max_tokens=700
+                max_tokens=800
             )
 
-            ai_response = response.choices[0].message.content
+            ai_result = response.choices[0].message.content
 
             st.markdown(
                 f"""
-                <div class="card">
-                {ai_response}
-                </div>
+                <div class="ai-card">
                 """,
                 unsafe_allow_html=True
             )
 
-        except Exception as e:
+            st.markdown(ai_result)
 
-            st.warning(
-                "AI analysis could not be generated. "
-                "Please check your Groq API key and connection."
+            st.markdown(
+                "</div>",
+                unsafe_allow_html=True
+            )
+
+        except Exception as error:
+
+            st.error(
+                "Groq AI analysis could not be generated. "
+                "Please verify your API key."
             )
 
     else:
 
         st.info(
-            "🔑 Enter your Groq API key in the sidebar "
-            "to generate an AI-powered performance analysis."
+            "🔑 Enter your Groq API key in the sidebar to "
+            "generate the AI-powered analysis."
         )
 
 
-# ---------------------------------------------------------
-# ACTUAL VS PREDICTED
-# ---------------------------------------------------------
+# =========================================================
+# FEATURE IMPORTANCE
+# =========================================================
 
 st.markdown(
-    '<div class="section-title">📊 Actual vs Predicted Performance</div>',
+    '<div class="section-title">📊 What Influences Performance?</div>',
     unsafe_allow_html=True
 )
 
-comparison_df = pd.DataFrame({
-    "Actual": y_test.values,
-    "Predicted": predictions
-}).reset_index(drop=True)
+importance = pd.DataFrame({
+    "Feature": features,
+    "Importance": model.feature_importances_
+})
 
-fig2 = plt.figure(figsize=(9, 5))
-
-plt.scatter(
-    comparison_df["Actual"],
-    comparison_df["Predicted"],
-    alpha=0.7
+importance = importance.sort_values(
+    "Importance",
+    ascending=True
 )
 
-plt.xlabel("Actual Performance")
-plt.ylabel("Predicted Performance")
-plt.title("Actual vs Predicted Performance")
+fig = plt.figure(figsize=(10, 4.5))
+
+plt.barh(
+    importance["Feature"],
+    importance["Importance"]
+)
+
+plt.xlabel("Relative Importance")
+plt.title("Random Forest Feature Importance")
 
 plt.tight_layout()
 
-st.pyplot(fig2)
-
-plt.close(fig2)
-
-
-# ---------------------------------------------------------
-# DOWNLOAD DATA
-# ---------------------------------------------------------
-
-st.markdown(
-    '<div class="section-title">📥 Export</div>',
-    unsafe_allow_html=True
-)
-
-csv_data = data.to_csv(index=False).encode("utf-8")
-
-st.download_button(
-    label="⬇️ Download Dataset",
-    data=csv_data,
-    file_name="intern_performance_dataset.csv",
-    mime="text/csv",
+st.pyplot(
+    fig,
     use_container_width=True
 )
 
+plt.close(fig)
 
-# ---------------------------------------------------------
+
+# =========================================================
+# ACTUAL VS PREDICTED
+# =========================================================
+
+with st.expander("📈 View Model Validation"):
+
+    comparison = pd.DataFrame({
+        "Actual": y_test.values,
+        "Predicted": predictions
+    })
+
+    fig2 = plt.figure(figsize=(9, 5))
+
+    plt.scatter(
+        comparison["Actual"],
+        comparison["Predicted"],
+        alpha=0.7
+    )
+
+    plt.xlabel("Actual Performance")
+    plt.ylabel("Predicted Performance")
+
+    plt.title(
+        "Actual vs Predicted Performance"
+    )
+
+    plt.tight_layout()
+
+    st.pyplot(
+        fig2,
+        use_container_width=True
+    )
+
+    plt.close(fig2)
+
+
+# =========================================================
 # FOOTER
-# ---------------------------------------------------------
+# =========================================================
 
-st.markdown("""
-<br>
+st.markdown(
+    """
+    <div class="custom-footer">
 
-<div style="
-text-align:center;
-padding:20px;
-color:#8793a3;
-">
+        <b>Intern Performance AI</b>
+        &nbsp; • &nbsp;
+        Random Forest
+        &nbsp; • &nbsp;
+        Generative AI
+        &nbsp; • &nbsp;
+        Streamlit
 
-<b>Intern Performance AI</b><br>
-Machine Learning • Random Forest • Generative AI • Streamlit
+        <br><br>
 
-</div>
-""", unsafe_allow_html=True)
+        Built with Machine Learning & AI
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
