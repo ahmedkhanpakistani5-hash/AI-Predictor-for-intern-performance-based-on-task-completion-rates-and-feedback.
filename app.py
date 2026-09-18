@@ -2,14 +2,16 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
 from groq import Groq
 
 
 # =========================================================
-# PAGE CONFIGURATION
+# PAGE CONFIG
 # =========================================================
 
 st.set_page_config(
@@ -21,100 +23,61 @@ st.set_page_config(
 
 
 # =========================================================
-# CUSTOM CSS
+# GLOBAL CSS
 # =========================================================
 
-st.markdown("""
+st.html("""
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-html, body, [class*="css"] {
+* {
     font-family: 'Inter', sans-serif;
 }
 
 .stApp {
     background:
         radial-gradient(
-            circle at 10% 15%,
-            rgba(44, 117, 108, 0.45),
+            circle at 5% 15%,
+            rgba(22, 111, 106, 0.45),
             transparent 28%
         ),
         radial-gradient(
-            circle at 88% 25%,
-            rgba(27, 68, 130, 0.55),
-            transparent 32%
+            circle at 95% 20%,
+            rgba(30, 66, 135, 0.48),
+            transparent 30%
         ),
         radial-gradient(
-            circle at 70% 85%,
-            rgba(92, 48, 34, 0.42),
+            circle at 75% 90%,
+            rgba(91, 49, 34, 0.42),
             transparent 30%
         ),
         linear-gradient(
             135deg,
-            #071018 0%,
-            #0b1724 42%,
-            #111b2d 70%,
-            #1b100d 100%
+            #071016 0%,
+            #0b1825 45%,
+            #111a2d 72%,
+            #1d110d 100%
         );
-
-    color: #f4f7fb;
 }
 
 
-/* =========================================================
-   SIDEBAR
-   ========================================================= */
+/* ================= SIDEBAR ================= */
 
 section[data-testid="stSidebar"] {
     background:
         linear-gradient(
             180deg,
             #11143b 0%,
-            #15163e 45%,
-            #10172f 100%
+            #15163d 50%,
+            #0d1730 100%
         );
 
     border-right: 1px solid rgba(255,255,255,0.08);
 }
 
-section[data-testid="stSidebar"] > div {
-    padding-top: 1.5rem;
-}
 
-.sidebar-title {
-    font-size: 23px;
-    font-weight: 800;
-    color: #f5f7ff;
-    margin-bottom: 18px;
-}
-
-.sidebar-section {
-    color: #d4a8ff;
-    font-size: 16px;
-    font-weight: 700;
-    margin-top: 25px;
-    margin-bottom: 10px;
-}
-
-.sidebar-info {
-    color: #9cc8ff;
-    line-height: 1.8;
-    font-size: 14px;
-}
-
-.sidebar-footer {
-    position: fixed;
-    bottom: 18px;
-    left: 20px;
-    color: #d6bd76;
-    font-size: 13px;
-}
-
-
-/* =========================================================
-   MAIN CONTAINER
-   ========================================================= */
+/* ================= MAIN AREA ================= */
 
 .block-container {
     max-width: 1450px;
@@ -123,41 +86,40 @@ section[data-testid="stSidebar"] > div {
 }
 
 
-/* =========================================================
-   HERO
-   ========================================================= */
+/* ================= HERO ================= */
 
 .hero {
     background:
         linear-gradient(
             135deg,
-            rgba(9, 50, 68, 0.95),
-            rgba(18, 32, 73, 0.96),
-            rgba(45, 23, 67, 0.94)
+            rgba(7, 63, 76, 0.96),
+            rgba(18, 37, 78, 0.97),
+            rgba(55, 27, 67, 0.96)
         );
 
-    border: 1px solid rgba(77, 214, 214, 0.15);
+    border: 1px solid rgba(72, 211, 210, 0.18);
+
     border-radius: 22px;
 
-    padding: 25px 30px;
+    padding: 27px 30px;
 
     box-shadow:
-        0 15px 50px rgba(0,0,0,0.35),
-        0 0 35px rgba(0, 174, 190, 0.12);
+        0 18px 55px rgba(0,0,0,0.38),
+        0 0 35px rgba(26, 183, 188, 0.10);
 
-    margin-bottom: 25px;
+    margin-bottom: 28px;
 }
 
 .hero-title {
-    font-size: 36px;
+    font-size: 38px;
     font-weight: 800;
 
     background:
         linear-gradient(
             90deg,
-            #45d5d0,
-            #66d7a9,
-            #a58aff
+            #4ed9d2,
+            #67dca5,
+            #9b8cff
         );
 
     -webkit-background-clip: text;
@@ -167,158 +129,122 @@ section[data-testid="stSidebar"] > div {
 }
 
 .hero-subtitle {
-    color: #e6e9f0;
+    color: #e7ebf3;
     font-size: 15px;
-    line-height: 1.6;
+    line-height: 1.65;
 }
 
 
-/* =========================================================
-   SECTION TITLES
-   ========================================================= */
+/* ================= SECTION TITLE ================= */
 
 .section-title {
-    font-size: 24px;
+    font-size: 25px;
     font-weight: 800;
-    margin-top: 25px;
-    margin-bottom: 17px;
 
-    background:
-        linear-gradient(
-            90deg,
-            #ffca70,
-            #ffc35c,
-            #70d7d2
-        );
+    color: #ffc96d;
 
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    margin-top: 28px;
+    margin-bottom: 18px;
 }
 
 
-/* =========================================================
-   GLASS CARDS
-   ========================================================= */
+/* ================= METRIC CARD ================= */
 
-.glass-card {
+.metric-card {
     background:
         linear-gradient(
             145deg,
-            rgba(47, 29, 24, 0.82),
-            rgba(11, 39, 61, 0.86)
+            rgba(48, 29, 24, 0.90),
+            rgba(12, 34, 56, 0.94)
         );
 
     border:
         1px solid rgba(255,255,255,0.09);
 
-    border-radius: 20px;
+    border-radius: 19px;
 
-    padding: 22px;
+    padding: 20px;
+
+    min-height: 115px;
+
+    text-align: center;
 
     box-shadow:
-        0 12px 40px rgba(0,0,0,0.30),
-        inset 0 1px 0 rgba(255,255,255,0.03);
+        0 12px 35px rgba(0,0,0,0.30);
+}
 
-    margin-bottom: 18px;
+.metric-label {
+    color: #91a4ba;
+    font-size: 13px;
+    margin-bottom: 9px;
+}
+
+.metric-value {
+    color: #f4e7d8;
+    font-size: 25px;
+    font-weight: 800;
 }
 
 
-/* =========================================================
-   INPUT CARDS
-   ========================================================= */
+/* ================= INPUT CARD ================= */
 
 .input-card {
     background:
         linear-gradient(
             145deg,
-            rgba(28, 29, 63, 0.94),
-            rgba(10, 40, 56, 0.92)
+            rgba(27, 30, 62, 0.95),
+            rgba(9, 43, 58, 0.94)
         );
 
-    border: 1px solid rgba(79, 207, 211, 0.14);
+    border:
+        1px solid rgba(73, 209, 211, 0.13);
 
     border-radius: 18px;
 
-    padding: 18px;
+    padding: 19px;
+
+    margin-bottom: 10px;
 
     box-shadow:
         0 10px 30px rgba(0,0,0,0.28);
 }
 
 .input-icon {
-    font-size: 26px;
+    font-size: 27px;
 }
 
 .input-title {
-    font-size: 15px;
+    color: #f4f6fa;
+    font-size: 16px;
     font-weight: 700;
-    color: #f1f4fa;
-    margin-top: 6px;
+    margin-top: 5px;
 }
 
 .input-description {
+    color: #8fa4ba;
     font-size: 12px;
-    color: #8fa5bd;
+    margin-top: 4px;
 }
 
 
-/* =========================================================
-   METRIC CARDS
-   ========================================================= */
-
-.metric-card {
-    background:
-        linear-gradient(
-            145deg,
-            rgba(43, 27, 23, 0.92),
-            rgba(13, 35, 58, 0.95)
-        );
-
-    border: 1px solid rgba(255,255,255,0.08);
-
-    border-radius: 18px;
-
-    padding: 18px;
-
-    text-align: center;
-
-    box-shadow:
-        0 10px 35px rgba(0,0,0,0.25);
-}
-
-.metric-label {
-    color: #91a3b8;
-    font-size: 13px;
-    margin-bottom: 7px;
-}
-
-.metric-value {
-    color: #f3e5d7;
-    font-size: 27px;
-    font-weight: 800;
-}
-
-
-/* =========================================================
-   PREDICTION RESULT
-   ========================================================= */
+/* ================= PREDICTION ================= */
 
 .prediction-card {
     background:
         radial-gradient(
             circle at 20% 20%,
-            rgba(30, 180, 171, 0.18),
-            transparent 30%
+            rgba(41, 190, 183, 0.16),
+            transparent 32%
         ),
         linear-gradient(
             135deg,
-            rgba(14, 53, 65, 0.95),
-            rgba(26, 28, 65, 0.96),
-            rgba(50, 27, 25, 0.94)
+            rgba(10, 55, 65, 0.97),
+            rgba(25, 31, 70, 0.97),
+            rgba(53, 28, 27, 0.96)
         );
 
     border:
-        1px solid rgba(83, 220, 210, 0.22);
+        1px solid rgba(75, 220, 211, 0.22);
 
     border-radius: 25px;
 
@@ -327,75 +253,79 @@ section[data-testid="stSidebar"] > div {
     text-align: center;
 
     box-shadow:
-        0 0 50px rgba(26, 190, 187, 0.12),
-        0 20px 50px rgba(0,0,0,0.35);
+        0 0 55px rgba(38, 194, 188, 0.12),
+        0 20px 55px rgba(0,0,0,0.35);
+}
+
+.prediction-small {
+    color: #a6b5c7;
+    font-size: 16px;
 }
 
 .prediction-score {
-    font-size: 64px;
+    font-size: 65px;
     font-weight: 800;
 
     background:
         linear-gradient(
             90deg,
-            #55e0d0,
-            #76dfa7,
-            #b4a2ff
+            #55dfd1,
+            #72dfa5,
+            #b29dff
         );
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+
+    margin: 7px 0;
 }
 
 .prediction-status {
+    color: #f4dfc8;
     font-size: 21px;
     font-weight: 700;
-    color: #f4dfca;
 }
 
 
-/* =========================================================
-   AI CARD
-   ========================================================= */
+/* ================= AI CARD ================= */
 
 .ai-card {
     background:
         linear-gradient(
             145deg,
-            rgba(26, 23, 57, 0.94),
-            rgba(9, 42, 58, 0.95)
+            rgba(28, 24, 58, 0.96),
+            rgba(8, 42, 57, 0.96)
         );
 
-    border: 1px solid rgba(143, 126, 255, 0.18);
+    border:
+        1px solid rgba(136, 121, 255, 0.20);
 
     border-radius: 20px;
 
-    padding: 25px;
+    padding: 26px;
 
     box-shadow:
-        0 15px 45px rgba(0,0,0,0.30);
+        0 15px 45px rgba(0,0,0,0.32);
 }
 
 
-/* =========================================================
-   BUTTON
-   ========================================================= */
+/* ================= BUTTON ================= */
 
 .stButton > button {
     width: 100%;
 
-    min-height: 50px;
+    min-height: 52px;
 
-    border-radius: 13px;
+    border-radius: 14px;
 
-    border: 1px solid rgba(91, 222, 215, 0.25);
+    border: 1px solid rgba(89, 218, 211, 0.25);
 
     background:
         linear-gradient(
             90deg,
-            #164b56,
-            #24396d,
-            #4b2d48
+            #164d58,
+            #24396e,
+            #4a2c49
         );
 
     color: white;
@@ -404,66 +334,40 @@ section[data-testid="stSidebar"] > div {
     font-weight: 700;
 
     box-shadow:
-        0 8px 25px rgba(0,0,0,0.30);
-
-    transition: 0.2s ease;
+        0 9px 27px rgba(0,0,0,0.30);
 }
 
 .stButton > button:hover {
-    border-color: #66ddd4;
+    border-color: #62ddd5;
 
     box-shadow:
-        0 0 25px rgba(70,210,204,0.20);
-
-    transform: translateY(-1px);
+        0 0 28px rgba(71,210,203,0.22);
 }
 
 
-/* =========================================================
-   SLIDERS
-   ========================================================= */
-
-div[data-testid="stSlider"] {
-    padding-top: 4px;
-}
-
-
-/* =========================================================
-   NUMBER INPUT
-   ========================================================= */
+/* ================= INPUTS ================= */
 
 div[data-baseweb="input"] {
-    background: rgba(7, 22, 36, 0.75);
+    background: rgba(7, 23, 38, 0.78);
     border-radius: 10px;
 }
 
 div[data-baseweb="input"] input {
-    color: #ffffff !important;
+    color: white !important;
 }
 
 
-/* =========================================================
-   SELECT BOX
-   ========================================================= */
+/* ================= FOOTER ================= */
 
-div[data-baseweb="select"] > div {
-    background: rgba(7, 22, 36, 0.80);
-    border-radius: 10px;
+.footer {
+    text-align: center;
+    color: #7f91a5;
+    font-size: 12px;
+    padding: 30px 0;
 }
 
 
-/* =========================================================
-   FILE / DEFAULT STREAMLIT ELEMENTS
-   ========================================================= */
-
-[data-testid="stMetric"] {
-    background: transparent;
-}
-
-
-/* =========================================================
-   HIDE STREAMLIT BRANDING
-   ========================================================= */
+/* ================= HIDE DEFAULT ================= */
 
 #MainMenu {
     visibility: hidden;
@@ -473,24 +377,12 @@ footer {
     visibility: hidden;
 }
 
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-.custom-footer {
-    text-align: center;
-    color: #8392a5;
-    font-size: 12px;
-    padding-top: 30px;
-}
-
 </style>
-""", unsafe_allow_html=True)
+""")
 
 
 # =========================================================
-# GENERATE INTERNAL DATASET
+# DATA GENERATION
 # =========================================================
 
 @st.cache_data
@@ -498,30 +390,22 @@ def generate_dataset():
 
     np.random.seed(42)
 
-    number_of_interns = 300
+    n = 300
 
-    task_completion_rate = np.random.uniform(
-        45, 100, number_of_interns
-    )
+    task_rate = np.random.uniform(45, 100, n)
 
-    task_completion_time = np.random.uniform(
-        1.5, 12, number_of_interns
-    )
+    completion_time = np.random.uniform(1.5, 12, n)
 
-    feedback_rating = np.random.uniform(
-        1, 5, number_of_interns
-    )
+    feedback = np.random.uniform(1, 5, n)
 
-    attendance = np.random.uniform(
-        55, 100, number_of_interns
-    )
+    attendance = np.random.uniform(55, 100, n)
 
     performance = (
-        task_completion_rate * 0.45
-        + (12 - task_completion_time) * 3.0
-        + feedback_rating * 7.0
+        task_rate * 0.45
+        + (12 - completion_time) * 3
+        + feedback * 7
         + attendance * 0.20
-        + np.random.normal(0, 3, number_of_interns)
+        + np.random.normal(0, 3, n)
     )
 
     performance = np.clip(
@@ -530,19 +414,17 @@ def generate_dataset():
         100
     )
 
-    dataset = pd.DataFrame({
-        "Task Completion Rate": task_completion_rate,
-        "Task Completion Time": task_completion_time,
-        "Feedback Rating": feedback_rating,
+    return pd.DataFrame({
+        "Task Completion Rate": task_rate,
+        "Task Completion Time": completion_time,
+        "Feedback Rating": feedback,
         "Attendance": attendance,
         "Performance Score": performance
     })
 
-    return dataset
-
 
 # =========================================================
-# TRAIN RANDOM FOREST
+# TRAIN MODEL
 # =========================================================
 
 @st.cache_resource
@@ -558,7 +440,6 @@ def train_model():
     ]
 
     X = data[features]
-
     y = data["Performance Score"]
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -575,10 +456,7 @@ def train_model():
         random_state=42
     )
 
-    model.fit(
-        X_train,
-        y_train
-    )
+    model.fit(X_train, y_train)
 
     predictions = model.predict(X_test)
 
@@ -630,13 +508,16 @@ def train_model():
 with st.sidebar:
 
     st.markdown(
-        '<div class="sidebar-title">⚙️ Dashboard Settings</div>',
-        unsafe_allow_html=True
+        "## ⚙️ Dashboard Settings"
     )
 
     st.markdown(
-        f"""
-        <div class="sidebar-info">
+        """
+        <div style="
+            color:#8fc5ff;
+            font-size:14px;
+            line-height:1.8;
+        ">
 
         <b>Model</b><br>
         Random Forest Regression
@@ -654,50 +535,45 @@ with st.sidebar:
         <br><br>
 
         <b>Training Records</b><br>
-        {len(data)} simulated interns
+        300 simulated interns
 
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    st.markdown(
-        '<div class="sidebar-section">🔑 API Configuration</div>',
-        unsafe_allow_html=True
-    )
-
-    groq_key = st.text_input(
-        "Groq API Key",
-        type="password",
-        placeholder="Enter your Groq API key",
-        label_visibility="collapsed"
-    )
-
-    st.caption(
-        "Used only during the current session."
-    )
-
     st.divider()
 
     st.markdown(
         """
-        <div class="sidebar-info">
-
-        <b>Model Metrics</b><br><br>
-
-        R² Score:
+        <div style="
+            color:#d5a6ff;
+            font-size:16px;
+            font-weight:700;
+        ">
+        📊 Model Metrics
+        </div>
         """,
         unsafe_allow_html=True
     )
 
-    st.write(f"**{r2:.2f}**")
-
     st.markdown(
         f"""
-        <div class="sidebar-info">
+        <div style="
+            color:#9bc9ff;
+            line-height:2;
+            font-size:14px;
+        ">
+
+        R² Score:
+        <b>{r2:.2f}</b>
+
+        <br>
 
         MAE:
-        <b>{mae:.2f}</b><br><br>
+        <b>{mae:.2f}</b>
+
+        <br>
 
         RMSE:
         <b>{rmse:.2f}</b>
@@ -707,8 +583,43 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
+    st.divider()
+
     st.markdown(
-        '<div class="sidebar-footer">Build with Streamlit & AI</div>',
+        """
+        <div style="
+            color:#d5a6ff;
+            font-size:15px;
+            font-weight:700;
+        ">
+        🤖 AI Analysis
+        </div>
+
+        <div style="
+            color:#9bc9ff;
+            font-size:13px;
+            line-height:1.6;
+            margin-top:7px;
+        ">
+        AI analysis is securely connected
+        through Streamlit Secrets.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div style="
+            position:fixed;
+            bottom:15px;
+            left:18px;
+            color:#d5bd70;
+            font-size:13px;
+        ">
+        Build with Streamlit & AI
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
@@ -717,247 +628,234 @@ with st.sidebar:
 # HERO
 # =========================================================
 
-st.markdown(
-    """
-    <div class="hero">
+st.html("""
+<div class="hero">
 
-        <div class="hero-title">
-            📊 Intern Performance AI
-        </div>
-
-        <div class="hero-subtitle">
-            Machine Learning powered performance prediction using
-            task completion, feedback ratings and attendance —
-            enhanced with Generative AI.
-        </div>
-
+    <div class="hero-title">
+        📊 Intern Performance AI
     </div>
-    """,
-    unsafe_allow_html=True
-)
+
+    <div class="hero-subtitle">
+        Machine Learning powered performance prediction using
+        task completion, feedback ratings and attendance —
+        enhanced with Generative AI.
+    </div>
+
+</div>
+""")
 
 
 # =========================================================
 # MODEL OVERVIEW
 # =========================================================
 
-st.markdown(
-    '<div class="section-title">📈 Model Overview</div>',
-    unsafe_allow_html=True
-)
+st.html("""
+<div class="section-title">
+    📊 Model Overview
+</div>
+""")
+
 
 c1, c2, c3, c4 = st.columns(4)
 
+
 with c1:
 
-    st.markdown(
-        f"""
-        <div class="metric-card">
+    st.html("""
+    <div class="metric-card">
 
-            <div class="metric-label">
-                🤖 Model
-            </div>
-
-            <div class="metric-value">
-                Random Forest
-            </div>
-
+        <div class="metric-label">
+            🤖 Model
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="metric-value">
+            Random Forest
+        </div>
+
+    </div>
+    """)
+
 
 with c2:
 
-    st.markdown(
-        f"""
-        <div class="metric-card">
+    st.html(f"""
+    <div class="metric-card">
 
-            <div class="metric-label">
-                🎯 R² Score
-            </div>
-
-            <div class="metric-value">
-                {r2:.2f}
-            </div>
-
+        <div class="metric-label">
+            🎯 R² Score
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="metric-value">
+            {r2:.2f}
+        </div>
+
+    </div>
+    """)
+
 
 with c3:
 
-    st.markdown(
-        f"""
-        <div class="metric-card">
+    st.html(f"""
+    <div class="metric-card">
 
-            <div class="metric-label">
-                📉 MAE
-            </div>
-
-            <div class="metric-value">
-                {mae:.2f}
-            </div>
-
+        <div class="metric-label">
+            📉 MAE
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="metric-value">
+            {mae:.2f}
+        </div>
+
+    </div>
+    """)
+
 
 with c4:
 
-    st.markdown(
-        f"""
-        <div class="metric-card">
+    st.html(f"""
+    <div class="metric-card">
 
-            <div class="metric-label">
-                👥 Training Records
-            </div>
-
-            <div class="metric-value">
-                {len(data)}
-            </div>
-
+        <div class="metric-label">
+            👥 Training Records
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="metric-value">
+            {len(data)}
+        </div>
+
+    </div>
+    """)
 
 
 # =========================================================
 # INTERN ASSESSMENT
 # =========================================================
 
-st.markdown(
-    '<div class="section-title">👤 Intern Assessment</div>',
-    unsafe_allow_html=True
-)
+st.html("""
+<div class="section-title">
+    👤 Intern Assessment
+</div>
+""")
+
 
 left, right = st.columns(2)
 
 
-# ---------------------------------------------------------
-# LEFT INPUTS
-# ---------------------------------------------------------
+# =========================================================
+# LEFT SIDE
+# =========================================================
 
 with left:
 
-    st.markdown(
-        """
-        <div class="input-card">
+    st.html("""
+    <div class="input-card">
 
-            <div class="input-icon">✅</div>
-
-            <div class="input-title">
-                Task Completion Rate
-            </div>
-
-            <div class="input-description">
-                Percentage of assigned tasks completed successfully
-            </div>
-
+        <div class="input-icon">
+            ✅
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="input-title">
+            Task Completion Rate
+        </div>
+
+        <div class="input-description">
+            Percentage of assigned tasks completed successfully.
+        </div>
+
+    </div>
+    """)
 
     task_rate = st.slider(
         "Task Completion Rate (%)",
         0,
         100,
-        82,
-        key="task_rate"
+        82
     )
 
-    st.markdown(
-        """
-        <div class="input-card">
 
-            <div class="input-icon">⏱️</div>
+    st.html("""
+    <div class="input-card">
 
-            <div class="input-title">
-                Task Completion Time
-            </div>
-
-            <div class="input-description">
-                Average time required to complete an assigned task
-            </div>
-
+        <div class="input-icon">
+            ⏱️
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="input-title">
+            Task Completion Time
+        </div>
+
+        <div class="input-description">
+            Average time required to complete a task.
+        </div>
+
+    </div>
+    """)
 
     completion_time = st.number_input(
         "Average Completion Time (hours)",
         min_value=0.5,
         max_value=50.0,
         value=5.0,
-        step=0.5,
-        key="completion_time"
+        step=0.5
     )
 
 
-# ---------------------------------------------------------
-# RIGHT INPUTS
-# ---------------------------------------------------------
+# =========================================================
+# RIGHT SIDE
+# =========================================================
 
 with right:
 
-    st.markdown(
-        """
-        <div class="input-card">
+    st.html("""
+    <div class="input-card">
 
-            <div class="input-icon">⭐</div>
-
-            <div class="input-title">
-                Feedback Rating
-            </div>
-
-            <div class="input-description">
-                Average feedback received from supervisors
-            </div>
-
+        <div class="input-icon">
+            ⭐
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="input-title">
+            Feedback Rating
+        </div>
+
+        <div class="input-description">
+            Average feedback received from supervisors.
+        </div>
+
+    </div>
+    """)
 
     feedback = st.slider(
         "Feedback Rating (1–5)",
         1.0,
         5.0,
         4.0,
-        0.1,
-        key="feedback"
+        0.1
     )
 
-    st.markdown(
-        """
-        <div class="input-card">
 
-            <div class="input-icon">📅</div>
+    st.html("""
+    <div class="input-card">
 
-            <div class="input-title">
-                Attendance
-            </div>
-
-            <div class="input-description">
-                Percentage of working days attended
-            </div>
-
+        <div class="input-icon">
+            📅
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="input-title">
+            Attendance
+        </div>
+
+        <div class="input-description">
+            Percentage of working days attended.
+        </div>
+
+    </div>
+    """)
 
     attendance = st.slider(
         "Attendance (%)",
         0,
         100,
-        88,
-        key="attendance"
+        88
     )
 
 
@@ -965,7 +863,7 @@ with right:
 # PREDICT BUTTON
 # =========================================================
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.write("")
 
 predict = st.button(
     "🔮 Predict Intern Performance",
@@ -986,24 +884,23 @@ if predict:
         "Attendance": [attendance]
     })
 
-    predicted_score = model.predict(
-        input_data
-    )[0]
+    score = model.predict(input_data)[0]
 
-    predicted_score = float(
+    score = float(
         np.clip(
-            predicted_score,
+            score,
             0,
             100
         )
     )
 
-    if predicted_score >= 75:
+
+    if score >= 75:
 
         status = "Likely to Excel"
         icon = "🚀"
 
-    elif predicted_score >= 55:
+    elif score >= 55:
 
         status = "Average / Developing"
         icon = "📈"
@@ -1018,137 +915,144 @@ if predict:
     # RESULT
     # =====================================================
 
-    st.markdown(
-        '<div class="section-title">🎯 Prediction Result</div>',
-        unsafe_allow_html=True
-    )
+    st.html("""
+    <div class="section-title">
+        🎯 Prediction Result
+    </div>
+    """)
 
-    st.markdown(
-        f"""
-        <div class="prediction-card">
+    st.html(f"""
+    <div class="prediction-card">
 
-            <div style="
-                font-size:18px;
-                color:#a9b8ca;
-                margin-bottom:5px;
-            ">
-                Predicted Performance Score
-            </div>
-
-            <div class="prediction-score">
-                {predicted_score:.1f}%
-            </div>
-
-            <div class="prediction-status">
-                {icon} {status}
-            </div>
-
-            <div style="
-                margin-top:12px;
-                color:#91a5b9;
-                font-size:13px;
-            ">
-                Generated using Random Forest Regression
-            </div>
-
+        <div class="prediction-small">
+            Predicted Performance Score
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="prediction-score">
+            {score:.1f}%
+        </div>
+
+        <div class="prediction-status">
+            {icon} {status}
+        </div>
+
+        <div style="
+            color:#8fa5b8;
+            font-size:13px;
+            margin-top:10px;
+        ">
+            Generated using Random Forest Regression
+        </div>
+
+    </div>
+    """)
 
 
     # =====================================================
-    # INPUT SUMMARY
+    # SUMMARY
     # =====================================================
 
-    st.markdown(
-        '<div class="section-title">📋 Assessment Summary</div>',
-        unsafe_allow_html=True
-    )
+    st.html("""
+    <div class="section-title">
+        📋 Assessment Summary
+    </div>
+    """)
+
 
     s1, s2, s3, s4 = st.columns(4)
 
+
     with s1:
-        st.markdown(
-            f"""
-            <div class="metric-card">
+
+        st.html(f"""
+        <div class="metric-card">
 
             <div class="metric-label">
-            Task Completion
+                Task Completion
             </div>
 
             <div class="metric-value">
-            {task_rate}%
+                {task_rate}%
             </div>
 
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        </div>
+        """)
+
 
     with s2:
-        st.markdown(
-            f"""
-            <div class="metric-card">
+
+        st.html(f"""
+        <div class="metric-card">
 
             <div class="metric-label">
-            Completion Time
+                Completion Time
             </div>
 
             <div class="metric-value">
-            {completion_time:.1f}h
+                {completion_time:.1f}h
             </div>
 
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        </div>
+        """)
+
 
     with s3:
-        st.markdown(
-            f"""
-            <div class="metric-card">
+
+        st.html(f"""
+        <div class="metric-card">
 
             <div class="metric-label">
-            Feedback
+                Feedback
             </div>
 
             <div class="metric-value">
-            {feedback:.1f}/5
+                {feedback:.1f}/5
             </div>
 
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        </div>
+        """)
+
 
     with s4:
-        st.markdown(
-            f"""
-            <div class="metric-card">
+
+        st.html(f"""
+        <div class="metric-card">
 
             <div class="metric-label">
-            Attendance
+                Attendance
             </div>
 
             <div class="metric-value">
-            {attendance}%
+                {attendance}%
             </div>
 
-            </div>
-            """,
-            unsafe_allow_html=True
+        </div>
+        """)
+
+
+    # =====================================================
+    # GROQ AI
+    # =====================================================
+
+    st.html("""
+    <div class="section-title">
+        🧠 Generative AI Analysis
+    </div>
+    """)
+
+
+    # Get key from Streamlit Secrets ONLY
+    try:
+
+        groq_key = st.secrets.get(
+            "GROQ_API_KEY",
+            ""
         )
 
+    except Exception:
 
-    # =====================================================
-    # GROQ AI ANALYSIS
-    # =====================================================
+        groq_key = ""
 
-    st.markdown(
-        '<div class="section-title">🧠 Generative AI Analysis</div>',
-        unsafe_allow_html=True
-    )
 
     if groq_key:
 
@@ -1161,34 +1065,30 @@ if predict:
             prompt = f"""
 You are an expert internship performance analyst.
 
-Analyze the following machine-learning prediction.
+Analyze this machine-learning prediction.
 
 Task Completion Rate: {task_rate}%
 Average Task Completion Time: {completion_time} hours
 Feedback Rating: {feedback}/5
 Attendance: {attendance}%
-Predicted Performance Score: {predicted_score:.1f}%
-Category: {status}
+Predicted Performance Score: {score:.1f}%
+Performance Category: {status}
 
-Provide a professional and concise analysis.
+Give a concise professional analysis.
 
-Use exactly these sections:
+Use these sections:
 
 ### Performance Summary
-Explain the overall prediction.
 
 ### Key Strengths
-Mention the strongest measurable factors.
 
 ### Areas to Improve
-Mention measurable areas that could improve.
 
 ### Practical Recommendations
-Give 2 or 3 actionable recommendations.
 
-Do not make assumptions about personality, health,
-background, or other sensitive personal characteristics.
-Focus only on the provided performance data.
+Focus only on the measurable performance data.
+Do not make assumptions about personality,
+health, background, or sensitive characteristics.
 """
 
             response = client.chat.completions.create(
@@ -1198,8 +1098,7 @@ Focus only on the provided performance data.
                         "role": "system",
                         "content": (
                             "You are a professional HR analytics "
-                            "assistant focused on objective "
-                            "performance analysis."
+                            "assistant."
                         )
                     },
                     {
@@ -1208,37 +1107,34 @@ Focus only on the provided performance data.
                     }
                 ],
                 temperature=0.4,
-                max_tokens=800
+                max_tokens=700
             )
 
             ai_result = response.choices[0].message.content
 
-            st.markdown(
-                f"""
-                <div class="ai-card">
-                """,
-                unsafe_allow_html=True
-            )
 
-            st.markdown(ai_result)
+            st.html("""
+            <div class="ai-card">
+            </div>
+            """)
 
             st.markdown(
-                "</div>",
-                unsafe_allow_html=True
+                ai_result
             )
+
 
         except Exception as error:
 
             st.error(
-                "Groq AI analysis could not be generated. "
-                "Please verify your API key."
+                "AI analysis could not be generated. "
+                "Please check your Groq API configuration."
             )
 
     else:
 
         st.info(
-            "🔑 Enter your Groq API key in the sidebar to "
-            "generate the AI-powered analysis."
+            "AI analysis is not configured yet. "
+            "Add GROQ_API_KEY to Streamlit Secrets."
         )
 
 
@@ -1246,10 +1142,12 @@ Focus only on the provided performance data.
 # FEATURE IMPORTANCE
 # =========================================================
 
-st.markdown(
-    '<div class="section-title">📊 What Influences Performance?</div>',
-    unsafe_allow_html=True
-)
+st.html("""
+<div class="section-title">
+    📊 Feature Importance
+</div>
+""")
+
 
 importance = pd.DataFrame({
     "Feature": features,
@@ -1261,15 +1159,23 @@ importance = importance.sort_values(
     ascending=True
 )
 
-fig = plt.figure(figsize=(10, 4.5))
+
+fig = plt.figure(
+    figsize=(10, 4.5)
+)
 
 plt.barh(
     importance["Feature"],
     importance["Importance"]
 )
 
-plt.xlabel("Relative Importance")
-plt.title("Random Forest Feature Importance")
+plt.xlabel(
+    "Relative Importance"
+)
+
+plt.title(
+    "Random Forest Feature Importance"
+)
 
 plt.tight_layout()
 
@@ -1282,7 +1188,7 @@ plt.close(fig)
 
 
 # =========================================================
-# ACTUAL VS PREDICTED
+# MODEL VALIDATION
 # =========================================================
 
 with st.expander("📈 View Model Validation"):
@@ -1292,7 +1198,9 @@ with st.expander("📈 View Model Validation"):
         "Predicted": predictions
     })
 
-    fig2 = plt.figure(figsize=(9, 5))
+    fig2 = plt.figure(
+        figsize=(9, 5)
+    )
 
     plt.scatter(
         comparison["Actual"],
@@ -1300,8 +1208,13 @@ with st.expander("📈 View Model Validation"):
         alpha=0.7
     )
 
-    plt.xlabel("Actual Performance")
-    plt.ylabel("Predicted Performance")
+    plt.xlabel(
+        "Actual Performance"
+    )
+
+    plt.ylabel(
+        "Predicted Performance"
+    )
 
     plt.title(
         "Actual vs Predicted Performance"
@@ -1321,23 +1234,20 @@ with st.expander("📈 View Model Validation"):
 # FOOTER
 # =========================================================
 
-st.markdown(
-    """
-    <div class="custom-footer">
+st.html("""
+<div class="footer">
 
-        <b>Intern Performance AI</b>
-        &nbsp; • &nbsp;
-        Random Forest
-        &nbsp; • &nbsp;
-        Generative AI
-        &nbsp; • &nbsp;
-        Streamlit
+    <b>Intern Performance AI</b>
+    &nbsp; • &nbsp;
+    Random Forest
+    &nbsp; • &nbsp;
+    Generative AI
+    &nbsp; • &nbsp;
+    Streamlit
 
-        <br><br>
+    <br><br>
 
-        Built with Machine Learning & AI
+    Built with Machine Learning & AI
 
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+</div>
+""")
